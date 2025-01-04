@@ -28,7 +28,7 @@ namespace Larje.Dialogue.Editor
             {
                 return false;
             }
-
+            
             bool windowIsOpen = EditorWindow.HasOpenInstances<DialogueGraphEditorWindow>();
             if (!windowIsOpen)
             {
@@ -51,13 +51,27 @@ namespace Larje.Dialogue.Editor
             _assetPath = assetPath;
             _fileName = System.IO.Path.GetFileNameWithoutExtension(assetPath);
             
+            Draw();
+            LoadGraph();
+        }
+
+        private void Draw()
+        {
             ClearVisualElement();
             ConstructGraphView();
             GenerateToolbar();
             //GenerateMiniMap();
             //GenerateBlackBoard();
-            
-            LoadGraph();
+        }
+        
+        private void OnDisable()
+        {
+            ClearVisualElement();
+        }
+
+        private void OnEnable()
+        {
+            Draw();
         }
         
         private void ClearVisualElement()
@@ -87,12 +101,12 @@ namespace Larje.Dialogue.Editor
             DialogueGraphEditorWindow window = GetWindow<DialogueGraphEditorWindow>();
             window.titleContent = new GUIContent(_fileName);
             
-            GraphSaveUtility.GetInstance(_graphView).LoadNarrative(_assetPath);
+            DialogueGraphSaveUtility.GetInstance(_graphView).LoadNarrative(_assetPath);
         }
 
         private void SaveGraph()
         {
-            GraphSaveUtility.GetInstance(_graphView).SaveGraph(_assetPath);
+            DialogueGraphSaveUtility.GetInstance(_graphView).SaveGraph(_assetPath);
         }
 
         private void GenerateMiniMap()
@@ -128,11 +142,6 @@ namespace Larje.Dialogue.Editor
             blackboard.SetPosition(new Rect(10,30,200,300));
             _graphView.Add(blackboard);
             _graphView.Blackboard = blackboard;
-        }
-
-        private void OnDisable()
-        {
-            rootVisualElement.Remove(_graphView);
         }
     }
 }

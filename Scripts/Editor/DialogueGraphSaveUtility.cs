@@ -13,20 +13,19 @@ using UnityEngine.UIElements;
 
 namespace Larje.Dialogue.Editor
 {
-    public class GraphSaveUtility
+    public class DialogueGraphSaveUtility
     {
         private List<Edge> Edges => _graphView.edges.ToList();
         private List<DialogueNode> Nodes => _graphView.nodes.ToList().Cast<DialogueNode>().ToList();
-
-        private List<Group> CommentBlocks =>
-            _graphView.graphElements.ToList().Where(x => x is Group).Cast<Group>().ToList();
+        private List<Group> CommentBlocks => _graphView.graphElements.ToList()
+            .Where(x => x is Group).Cast<Group>().ToList();
 
         private DialogueContainer _dialogueContainer;
         private DialogueGraphView _graphView;
 
-        public static GraphSaveUtility GetInstance(DialogueGraphView graphView)
+        public static DialogueGraphSaveUtility GetInstance(DialogueGraphView graphView)
         {
-            return new GraphSaveUtility
+            return new DialogueGraphSaveUtility
             {
                 _graphView = graphView
             };
@@ -128,10 +127,7 @@ namespace Larje.Dialogue.Editor
             AddExposedProperties();
             GenerateCommentBlocks();
         }
-
-        /// <summary>
-        /// Set Entry point GUID then Get All Nodes, remove all and their edges. Leave only the entrypoint node. (Remove its edge too)
-        /// </summary>
+        
         private void ClearGraph()
         {
             if (_dialogueContainer.NodeLinks.Count <= 0)
@@ -167,10 +163,7 @@ namespace Larje.Dialogue.Editor
                 Debug.LogError("GraphSaveUtility: Nodes list is null");
             }
         }
-
-        /// <summary>
-        /// Create All serialized nodes and assign their guid and dialogue text to them
-        /// </summary>
+        
         private void GenerateDialogueNodes()
         {
             foreach (var perNode in _dialogueContainer.DialogueNodeData)
