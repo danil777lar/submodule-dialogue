@@ -22,9 +22,9 @@ namespace Larje.Dialogue.Editor
             _graphView.graphElements.ToList().Where(x => x is Group).Cast<Group>().ToList();
 
         private DialogueContainer _dialogueContainer;
-        private StoryGraphView _graphView;
+        private DialogueGraphView _graphView;
 
-        public static GraphSaveUtility GetInstance(StoryGraphView graphView)
+        public static GraphSaveUtility GetInstance(DialogueGraphView graphView)
         {
             return new GraphSaveUtility
             {
@@ -32,21 +32,22 @@ namespace Larje.Dialogue.Editor
             };
         }
 
-        public void SaveGraph(string fileName)
+        public void SaveGraph(string assetPath)
         {
-            var dialogueContainerObject = ScriptableObject.CreateInstance<DialogueContainer>();
-            if (!SaveNodes(fileName, dialogueContainerObject)) return;
+            DialogueContainer dialogueContainerObject = ScriptableObject.CreateInstance<DialogueContainer>();
+            if (!SaveNodes(dialogueContainerObject))
+            {
+                return;
+            }
+            
             SaveExposedProperties(dialogueContainerObject);
             SaveCommentBlocks(dialogueContainerObject);
-
-            if (!AssetDatabase.IsValidFolder("Assets/Resources"))
-                AssetDatabase.CreateFolder("Assets", "Resources");
-
-            UnityEngine.Object loadedAsset = AssetDatabase.LoadAssetAtPath($"Assets/Resources/{fileName}.asset", typeof(DialogueContainer));
+            
+            UnityEngine.Object loadedAsset = AssetDatabase.LoadAssetAtPath(assetPath, typeof(DialogueContainer));
 
             if (loadedAsset == null || !AssetDatabase.Contains(loadedAsset)) 
 			{
-                AssetDatabase.CreateAsset(dialogueContainerObject, $"Assets/Resources/{fileName}.asset");
+                AssetDatabase.CreateAsset(dialogueContainerObject, assetPath);
             }
             else 
 			{
@@ -61,7 +62,7 @@ namespace Larje.Dialogue.Editor
             AssetDatabase.SaveAssets();
         }
 
-        private bool SaveNodes(string fileName, DialogueContainer dialogueContainerObject)
+        private bool SaveNodes(DialogueContainer dialogueContainerObject)
         {
             if (!Edges.Any()) return false;
             var connectedSockets = Edges.Where(x => x.input.node != null).ToArray();
@@ -112,9 +113,9 @@ namespace Larje.Dialogue.Editor
             }
         }
 
-        public void LoadNarrative(string fileName)
+        public void LoadNarrative(string assetPath)
         {
-            _dialogueContainer = Resources.Load<DialogueContainer>(fileName);
+            _dialogueContainer = AssetDatabase.LoadAssetAtPath<DialogueContainer>(assetPath);
             if (_dialogueContainer == null)
             {
                 EditorUtility.DisplayDialog("File Not Found", "Target Narrative Data does not exist!", "OK");
@@ -133,13 +134,37 @@ namespace Larje.Dialogue.Editor
         /// </summary>
         private void ClearGraph()
         {
-            Nodes.Find(x => x.EntyPoint).GUID = _dialogueContainer.NodeLinks[0].BaseNodeGUID;
-            foreach (var perNode in Nodes)
+            if (_dialogueContainer.NodeLinks.Count <= 0)
             {
-                if (perNode.EntyPoint) continue;
-                Edges.Where(x => x.input.node == perNode).ToList()
-                    .ForEach(edge => _graphView.RemoveElement(edge));
-                _graphView.RemoveElement(perNode);
+                return;
+            }
+                
+            if (Nodes != null)
+            {
+                DialogueNode entryPoint = Nodes.Find(x => x.EntyPoint);
+                if (entryPoint != null)
+                {
+                    entryPoint.GUID = _dialogueContainer.NodeLinks[0].BaseNodeGUID;
+                    foreach (DialogueNode perNode in Nodes)
+                    {
+                        if (perNode.EntyPoint)
+                        {
+                            continue;
+                        }
+                        
+                        Edges.Where(x => x.input.node == perNode).ToList()
+                            .ForEach(edge => _graphView.RemoveElement(edge));
+                        _graphView.RemoveElement(perNode);
+                    }      
+                }
+                else
+                {
+                    Debug.LogError("GraphSaveUtility: Entry point node not found");
+                }
+            }
+            else
+            {
+                Debug.LogError("GraphSaveUtility: Nodes list is null");
             }
         }
 

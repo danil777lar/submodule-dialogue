@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Larje.Dialogue.DataContainers;
 using UnityEditor;
+using UnityEditor.Callbacks;
 using UnityEditor.Experimental.GraphView;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -11,25 +12,64 @@ using UnityEngine.UIElements;
 
 namespace Larje.Dialogue.Editor
 {
-    public class StoryGraph : EditorWindow
+    public class DialogueGraphEditorWindow : EditorWindow
     {
         private string _fileName = "New Narrative";
-
-        private StoryGraphView _graphView;
+        private string _assetPath = "";
+        
+        private DialogueGraphView _graphView;
         private DialogueContainer _dialogueContainer;
-
-        [MenuItem("Graph/Narrative Graph")]
-        public static void CreateGraphViewWindow()
+        
+        [OnOpenAsset(1)]
+        public static bool OpenGraphAsset(int instanceID, int line)
         {
-            var window = GetWindow<StoryGraph>();
-            window.titleContent = new GUIContent("Narrative Graph");
+            UnityEngine.Object asset = EditorUtility.InstanceIDToObject(instanceID);
+            if (!(asset is DialogueContainer))
+            {
+                return false;
+            }
+
+            bool windowIsOpen = EditorWindow.HasOpenInstances<DialogueGraphEditorWindow>();
+            if (!windowIsOpen)
+            {
+                EditorWindow.CreateWindow<DialogueGraphEditorWindow>();
+            }
+            else
+            {
+                EditorWindow.FocusWindowIfItsOpen<DialogueGraphEditorWindow>();
+            }
+
+            DialogueGraphEditorWindow window = EditorWindow.GetWindow<DialogueGraphEditorWindow>();
+            
+            window.Initialize(AssetDatabase.GetAssetPath(instanceID));
+
+            return true;
+        }
+
+        private void Initialize(string assetPath)
+        {
+            _assetPath = assetPath;
+            _fileName = System.IO.Path.GetFileNameWithoutExtension(assetPath);
+            
+            ClearVisualElement();
+            ConstructGraphView();
+            GenerateToolbar();
+            //GenerateMiniMap();
+            //GenerateBlackBoard();
+            
+            LoadGraph();
+        }
+        
+        private void ClearVisualElement()
+        {
+            rootVisualElement.Clear();
         }
 
         private void ConstructGraphView()
         {
-            _graphView = new StoryGraphView(this)
+            _graphView = new DialogueGraphView(this)
             {
-                name = "Narrative Graph",
+                name = _fileName,
             };
             _graphView.StretchToParentSize();
             rootVisualElement.Add(_graphView);
@@ -37,49 +77,28 @@ namespace Larje.Dialogue.Editor
 
         private void GenerateToolbar()
         {
-            var toolbar = new Toolbar();
-
-            var fileNameTextField = new TextField("File Name:");
-            fileNameTextField.SetValueWithoutNotify(_fileName);
-            fileNameTextField.MarkDirtyRepaint();
-            fileNameTextField.RegisterValueChangedCallback(evt => _fileName = evt.newValue);
-            toolbar.Add(fileNameTextField);
-
-            toolbar.Add(new Button(() => RequestDataOperation(true)) {text = "Save Data"});
-
-            toolbar.Add(new Button(() => RequestDataOperation(false)) {text = "Load Data"});
-            // toolbar.Add(new Button(() => _graphView.CreateNewDialogueNode("Dialogue Node")) {text = "New Node",});
+            Toolbar toolbar = new Toolbar();
+            toolbar.Add(new Button(SaveGraph) {text = "Save"});
             rootVisualElement.Add(toolbar);
         }
-
-        private void RequestDataOperation(bool save)
+        
+        private void LoadGraph()
         {
-            if (!string.IsNullOrEmpty(_fileName))
-            {
-                var saveUtility = GraphSaveUtility.GetInstance(_graphView);
-                if (save)
-                    saveUtility.SaveGraph(_fileName);
-                else
-                    saveUtility.LoadNarrative(_fileName);
-            }
-            else
-            {
-                EditorUtility.DisplayDialog("Invalid File name", "Please Enter a valid filename", "OK");
-            }
+            DialogueGraphEditorWindow window = GetWindow<DialogueGraphEditorWindow>();
+            window.titleContent = new GUIContent(_fileName);
+            
+            GraphSaveUtility.GetInstance(_graphView).LoadNarrative(_assetPath);
         }
 
-        private void OnEnable()
+        private void SaveGraph()
         {
-            ConstructGraphView();
-            GenerateToolbar();
-            GenerateMiniMap();
-            GenerateBlackBoard();
+            GraphSaveUtility.GetInstance(_graphView).SaveGraph(_assetPath);
         }
 
         private void GenerateMiniMap()
         {
-            var miniMap = new MiniMap {anchored = true};
-            var cords = _graphView.contentViewContainer.WorldToLocal(new Vector2(this.maxSize.x - 10, 30));
+            MiniMap miniMap = new MiniMap {anchored = true};
+            Vector2 cords = _graphView.contentViewContainer.WorldToLocal(new Vector2(this.maxSize.x - 10, 30));
             miniMap.SetPosition(new Rect(cords.x, cords.y, 200, 140));
             _graphView.Add(miniMap);
         }

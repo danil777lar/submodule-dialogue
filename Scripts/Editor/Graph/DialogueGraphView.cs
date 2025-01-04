@@ -12,7 +12,7 @@ using Button = UnityEngine.UIElements.Button;
 
 namespace Larje.Dialogue.Editor
 {
-    public class StoryGraphView : GraphView
+    public class DialogueGraphView : GraphView
     {
         public readonly Vector2 DefaultNodeSize = new Vector2(200, 150);
         public readonly Vector2 DefaultCommentBlockSize = new Vector2(300, 200);
@@ -21,7 +21,7 @@ namespace Larje.Dialogue.Editor
         public List<ExposedProperty> ExposedProperties { get; private set; } = new List<ExposedProperty>();
         private NodeSearchWindow _searchWindow;
 
-        public StoryGraphView(StoryGraph editorWindow)
+        public DialogueGraphView(DialogueGraphEditorWindow editorWindow)
         {
             styleSheets.Add(Resources.Load<StyleSheet>("NarrativeGraph"));
             SetupZoom(ContentZoomer.DefaultMinScale, ContentZoomer.DefaultMaxScale);
@@ -41,7 +41,7 @@ namespace Larje.Dialogue.Editor
         }
 
 
-        private void AddSearchWindow(StoryGraph editorWindow)
+        private void AddSearchWindow(DialogueGraphEditorWindow editorWindow)
         {
             _searchWindow = ScriptableObject.CreateInstance<NodeSearchWindow>();
             _searchWindow.Configure(editorWindow, this);
