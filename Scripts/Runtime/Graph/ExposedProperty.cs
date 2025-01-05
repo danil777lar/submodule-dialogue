@@ -1,4 +1,4 @@
-﻿namespace Larje.Dialogue.DataContainers
+﻿namespace Larje.Dialogue.Runtime.Graph
 {
     [System.Serializable]
     public class ExposedProperty

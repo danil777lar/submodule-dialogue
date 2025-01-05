@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
-using Larje.Dialogue.DataContainers;
+using Larje.Dialogue.Runtime.Graph;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
@@ -69,11 +69,11 @@ namespace Larje.Dialogue.Editor
             {
                 var outputNode = (connectedSockets[i].output.node as DialogueNode);
                 var inputNode = (connectedSockets[i].input.node as DialogueNode);
-                dialogueContainerObject.NodeLinks.Add(new NodeLinkData
+                dialogueContainerObject.NodeLinks.Add(new DialogueNodeLinkData
                 {
-                    BaseNodeGUID = outputNode.GUID,
+                    FromGUID = outputNode.GUID,
                     PortName = connectedSockets[i].output.portName,
-                    TargetNodeGUID = inputNode.GUID
+                    ToGUID = inputNode.GUID
                 });
             }
 
@@ -81,8 +81,8 @@ namespace Larje.Dialogue.Editor
             {
                 dialogueContainerObject.DialogueNodeData.Add(new DialogueNodeData
                 {
-                    NodeGUID = node.GUID,
-                    DialogueText = node.DialogueText,
+                    GUID = node.GUID,
+                    Text = node.DialogueText,
                     Position = node.GetPosition().position
                 });
             }
@@ -140,7 +140,7 @@ namespace Larje.Dialogue.Editor
                 DialogueNode entryPoint = Nodes.Find(x => x.EntyPoint);
                 if (entryPoint != null)
                 {
-                    entryPoint.GUID = _dialogueContainer.NodeLinks[0].BaseNodeGUID;
+                    entryPoint.GUID = _dialogueContainer.NodeLinks[0].FromGUID;
                     foreach (DialogueNode perNode in Nodes)
                     {
                         if (perNode.EntyPoint)
@@ -168,11 +168,11 @@ namespace Larje.Dialogue.Editor
         {
             foreach (var perNode in _dialogueContainer.DialogueNodeData)
             {
-                var tempNode = _graphView.CreateNode(perNode.DialogueText, Vector2.zero);
-                tempNode.GUID = perNode.NodeGUID;
+                var tempNode = _graphView.CreateNode(perNode.Text, Vector2.zero);
+                tempNode.GUID = perNode.GUID;
                 _graphView.AddElement(tempNode);
 
-                var nodePorts = _dialogueContainer.NodeLinks.Where(x => x.BaseNodeGUID == perNode.NodeGUID).ToList();
+                var nodePorts = _dialogueContainer.NodeLinks.Where(x => x.FromGUID == perNode.GUID).ToList();
                 nodePorts.ForEach(x => _graphView.AddChoicePort(tempNode, x.PortName));
             }
         }
@@ -182,15 +182,15 @@ namespace Larje.Dialogue.Editor
             for (var i = 0; i < Nodes.Count; i++)
             {
                 var k = i; //Prevent access to modified closure
-                var connections = _dialogueContainer.NodeLinks.Where(x => x.BaseNodeGUID == Nodes[k].GUID).ToList();
+                var connections = _dialogueContainer.NodeLinks.Where(x => x.FromGUID == Nodes[k].GUID).ToList();
                 for (var j = 0; j < connections.Count(); j++)
                 {
-                    var targetNodeGUID = connections[j].TargetNodeGUID;
+                    var targetNodeGUID = connections[j].ToGUID;
                     var targetNode = Nodes.First(x => x.GUID == targetNodeGUID);
                     LinkNodesTogether(Nodes[i].outputContainer[j].Q<Port>(), (Port) targetNode.inputContainer[0]);
 
                     targetNode.SetPosition(new Rect(
-                        _dialogueContainer.DialogueNodeData.First(x => x.NodeGUID == targetNodeGUID).Position,
+                        _dialogueContainer.DialogueNodeData.First(x => x.GUID == targetNodeGUID).Position,
                         _graphView.DefaultNodeSize));
                 }
             }

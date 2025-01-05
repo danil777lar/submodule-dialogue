@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Larje.Dialogue.DataContainers;
+using Larje.Dialogue.Runtime.Graph;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;

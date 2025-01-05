@@ -1,13 +1,14 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-namespace Larje.Dialogue.DataContainers
+namespace Larje.Dialogue.Runtime.Graph
 {
     [Serializable]
     public class DialogueNodeData
     {
-        public string NodeGUID;
-        public string DialogueText;
+        public string GUID;
+        public string Text;
         public Vector2 Position;
     }
 }

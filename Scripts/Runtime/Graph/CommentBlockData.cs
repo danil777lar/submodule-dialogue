@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Larje.Dialogue.DataContainers
+namespace Larje.Dialogue.Runtime.Graph
 {
     [Serializable]
     public class CommentBlockData
     {
         public List<string> ChildNodes = new List<string>();
         public Vector2 Position;
-        public string Title= "Comment Block";
+        public string Title = "Comment Block";
     }
 }
