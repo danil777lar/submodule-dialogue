@@ -31,16 +31,27 @@ namespace Larje.Dialogue.Editor
             var tree = new List<SearchTreeEntry>
             {
                 new SearchTreeGroupEntry(new GUIContent("Create Node"), 0),
-                new SearchTreeGroupEntry(new GUIContent("Dialogue"), 1),
+                
                 new SearchTreeEntry(new GUIContent("Dialogue Node", _indentationIcon))
                 {
-                    level = 2, userData = new DialogueNode()
+                    level = 1, userData = new DialogueGraphNode()
                 },
-                new SearchTreeEntry(new GUIContent("Comment Block",_indentationIcon))
+                
+                new SearchTreeEntry(new GUIContent("Enter Node", _indentationIcon))
+                {
+                    level = 1, userData = new EnterGraphNode()
+                },
+                
+                new SearchTreeEntry(new GUIContent("Exit Node", _indentationIcon))
+                {
+                    level = 1, userData = new ExitGraphNode()
+                },
+                
+                /*new SearchTreeEntry(new GUIContent("Comment Block",_indentationIcon))
                 {
                     level = 1,
                     userData = new Group()
-                }
+                }*/
             };
 
             return tree;
@@ -49,13 +60,13 @@ namespace Larje.Dialogue.Editor
         public bool OnSelectEntry(SearchTreeEntry SearchTreeEntry, SearchWindowContext context)
         {
             //Editor window-based mouse position
-            var mousePosition = _window.rootVisualElement.ChangeCoordinatesTo(_window.rootVisualElement.parent,
+            Vector2 mousePosition = _window.rootVisualElement.ChangeCoordinatesTo(_window.rootVisualElement.parent,
                 context.screenMousePosition - _window.position.position);
-            var graphMousePosition = _graphView.contentViewContainer.WorldToLocal(mousePosition);
+            Vector2 graphMousePosition = _graphView.contentViewContainer.WorldToLocal(mousePosition);
             switch (SearchTreeEntry.userData)
             {
-                case DialogueNode dialogueNode:
-                    _graphView.CreateNewDialogueNode("Dialogue Node",graphMousePosition);
+                case GraphNode node:
+                    _graphView.CreateNewGraphNode("Node", graphMousePosition);
                     return true;
                 case Group group:
                     var rect = new Rect(graphMousePosition, _graphView.DefaultCommentBlockSize);

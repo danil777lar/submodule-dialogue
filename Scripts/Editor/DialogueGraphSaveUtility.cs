@@ -16,7 +16,7 @@ namespace Larje.Dialogue.Editor
     public class DialogueGraphSaveUtility
     {
         private List<Edge> Edges => _graphView.edges.ToList();
-        private List<DialogueNode> Nodes => _graphView.nodes.ToList().Cast<DialogueNode>().ToList();
+        private List<DialogueGraphNode> Nodes => _graphView.nodes.ToList().Cast<DialogueGraphNode>().ToList();
         private List<Group> CommentBlocks => _graphView.graphElements.ToList()
             .Where(x => x is Group).Cast<Group>().ToList();
 
@@ -67,8 +67,8 @@ namespace Larje.Dialogue.Editor
             var connectedSockets = Edges.Where(x => x.input.node != null).ToArray();
             for (var i = 0; i < connectedSockets.Count(); i++)
             {
-                var outputNode = (connectedSockets[i].output.node as DialogueNode);
-                var inputNode = (connectedSockets[i].input.node as DialogueNode);
+                var outputNode = (connectedSockets[i].output.node as DialogueGraphNode);
+                var inputNode = (connectedSockets[i].input.node as DialogueGraphNode);
                 dialogueContainerObject.NodeLinks.Add(new DialogueNodeLinkData
                 {
                     FromGUID = outputNode.GUID,
@@ -77,7 +77,7 @@ namespace Larje.Dialogue.Editor
                 });
             }
 
-            foreach (var node in Nodes.Where(node => !node.EntyPoint))
+            foreach (DialogueGraphNode node in Nodes)
             {
                 dialogueContainerObject.DialogueNodeData.Add(new DialogueNodeData
                 {
@@ -100,7 +100,7 @@ namespace Larje.Dialogue.Editor
         {
             foreach (var block in CommentBlocks)
             {
-                var nodes = block.containedElements.Where(x => x is DialogueNode).Cast<DialogueNode>().Select(x => x.GUID)
+                var nodes = block.containedElements.Where(x => x is DialogueGraphNode).Cast<DialogueGraphNode>().Select(x => x.GUID)
                     .ToList();
 
                 dialogueContainer.CommentBlockData.Add(new CommentBlockData
@@ -134,28 +134,14 @@ namespace Larje.Dialogue.Editor
             {
                 return;
             }
-                
+
             if (Nodes != null)
             {
-                DialogueNode entryPoint = Nodes.Find(x => x.EntyPoint);
-                if (entryPoint != null)
+                foreach (DialogueGraphNode perNode in Nodes)
                 {
-                    entryPoint.GUID = _dialogueContainer.NodeLinks[0].FromGUID;
-                    foreach (DialogueNode perNode in Nodes)
-                    {
-                        if (perNode.EntyPoint)
-                        {
-                            continue;
-                        }
-                        
-                        Edges.Where(x => x.input.node == perNode).ToList()
-                            .ForEach(edge => _graphView.RemoveElement(edge));
-                        _graphView.RemoveElement(perNode);
-                    }      
-                }
-                else
-                {
-                    Debug.LogError("GraphSaveUtility: Entry point node not found");
+                    Edges.Where(x => x.input.node == perNode).ToList()
+                        .ForEach(edge => _graphView.RemoveElement(edge));
+                    _graphView.RemoveElement(perNode);
                 }
             }
             else
