@@ -15,13 +15,11 @@ namespace Larje.Dialogue.Editor
 {
     public class DialogueGraphSaveUtility
     {
-        private List<Edge> Edges => _graphView.edges.ToList();
-        private List<DialogueGraphNode> Nodes => _graphView.nodes.ToList().Cast<DialogueGraphNode>().ToList();
-        private List<Group> CommentBlocks => _graphView.graphElements.ToList()
-            .Where(x => x is Group).Cast<Group>().ToList();
-
-        private DialogueContainer _dialogueContainer;
         private DialogueGraphView _graphView;
+        private DialogueContainer _dialogueContainer;
+        
+        private List<Edge> Edges => _graphView.edges.ToList();
+        private List<GraphNode> Nodes => _graphView.nodes.ToList().Cast<GraphNode>().ToList();
 
         public static DialogueGraphSaveUtility GetInstance(DialogueGraphView graphView)
         {
@@ -38,9 +36,6 @@ namespace Larje.Dialogue.Editor
             {
                 return;
             }
-            
-            SaveExposedProperties(dialogueContainerObject);
-            SaveCommentBlocks(dialogueContainerObject);
             
             UnityEngine.Object loadedAsset = AssetDatabase.LoadAssetAtPath(assetPath, typeof(DialogueContainer));
 
@@ -64,11 +59,11 @@ namespace Larje.Dialogue.Editor
         private bool SaveNodes(DialogueContainer dialogueContainerObject)
         {
             if (!Edges.Any()) return false;
-            var connectedSockets = Edges.Where(x => x.input.node != null).ToArray();
-            for (var i = 0; i < connectedSockets.Count(); i++)
+            Edge[] connectedSockets = Edges.Where(x => x.input.node != null).ToArray();
+            for (int i = 0; i < connectedSockets.Count(); i++)
             {
-                var outputNode = (connectedSockets[i].output.node as DialogueGraphNode);
-                var inputNode = (connectedSockets[i].input.node as DialogueGraphNode);
+                DialogueGraphNode outputNode = (connectedSockets[i].output.node as DialogueGraphNode);
+                DialogueGraphNode inputNode = (connectedSockets[i].input.node as DialogueGraphNode);
                 dialogueContainerObject.NodeLinks.Add(new DialogueNodeLinkData
                 {
                     FromGUID = outputNode.GUID,
@@ -96,22 +91,6 @@ namespace Larje.Dialogue.Editor
             dialogueContainer.ExposedProperties.AddRange(_graphView.ExposedProperties);
         }
 
-        private void SaveCommentBlocks(DialogueContainer dialogueContainer)
-        {
-            foreach (var block in CommentBlocks)
-            {
-                var nodes = block.containedElements.Where(x => x is DialogueGraphNode).Cast<DialogueGraphNode>().Select(x => x.GUID)
-                    .ToList();
-
-                dialogueContainer.CommentBlockData.Add(new CommentBlockData
-                {
-                    ChildNodes = nodes,
-                    Title = block.title,
-                    Position = block.GetPosition().position
-                });
-            }
-        }
-
         public void LoadNarrative(string assetPath)
         {
             _dialogueContainer = AssetDatabase.LoadAssetAtPath<DialogueContainer>(assetPath);
@@ -125,7 +104,6 @@ namespace Larje.Dialogue.Editor
             GenerateDialogueNodes();
             ConnectDialogueNodes();
             AddExposedProperties();
-            GenerateCommentBlocks();
         }
         
         private void ClearGraph()
@@ -152,39 +130,39 @@ namespace Larje.Dialogue.Editor
         
         private void GenerateDialogueNodes()
         {
-            foreach (var perNode in _dialogueContainer.DialogueNodeData)
+            /*foreach (DialogueNodeData perNode in _dialogueContainer.DialogueNodeData)
             {
                 var tempNode = _graphView.CreateNode(perNode.Text, Vector2.zero);
                 tempNode.GUID = perNode.GUID;
                 _graphView.AddElement(tempNode);
 
-                var nodePorts = _dialogueContainer.NodeLinks.Where(x => x.FromGUID == perNode.GUID).ToList();
+                List<DialogueNodeLinkData> nodePorts = _dialogueContainer.NodeLinks.Where(x => x.FromGUID == perNode.GUID).ToList();
                 nodePorts.ForEach(x => _graphView.AddChoicePort(tempNode, x.PortName));
-            }
+            }*/
         }
 
         private void ConnectDialogueNodes()
         {
-            for (var i = 0; i < Nodes.Count; i++)
+            /*for (int i = 0; i < Nodes.Count; i++)
             {
-                var k = i; //Prevent access to modified closure
-                var connections = _dialogueContainer.NodeLinks.Where(x => x.FromGUID == Nodes[k].GUID).ToList();
-                for (var j = 0; j < connections.Count(); j++)
+                int k = i; //Prevent access to modified closure
+                List<DialogueNodeLinkData> connections = _dialogueContainer.NodeLinks.Where(x => x.FromGUID == Nodes[k].GUID).ToList();
+                for (int j = 0; j < connections.Count(); j++)
                 {
-                    var targetNodeGUID = connections[j].ToGUID;
-                    var targetNode = Nodes.First(x => x.GUID == targetNodeGUID);
+                    string targetNodeGUID = connections[j].ToGUID;
+                    DialogueGraphNode targetNode = Nodes.First(x => x.GUID == targetNodeGUID);
                     LinkNodesTogether(Nodes[i].outputContainer[j].Q<Port>(), (Port) targetNode.inputContainer[0]);
 
                     targetNode.SetPosition(new Rect(
                         _dialogueContainer.DialogueNodeData.First(x => x.GUID == targetNodeGUID).Position,
                         _graphView.DefaultNodeSize));
                 }
-            }
+            }*/
         }
 
         private void LinkNodesTogether(Port outputSocket, Port inputSocket)
         {
-            var tempEdge = new Edge()
+            Edge tempEdge = new Edge()
             {
                 output = outputSocket,
                 input = inputSocket
@@ -200,21 +178,6 @@ namespace Larje.Dialogue.Editor
             foreach (var exposedProperty in _dialogueContainer.ExposedProperties)
             {
                 _graphView.AddPropertyToBlackBoard(exposedProperty);
-            }
-        }
-
-        private void GenerateCommentBlocks()
-        {
-            foreach (var commentBlock in CommentBlocks)
-            {
-                _graphView.RemoveElement(commentBlock);
-            }
-
-            foreach (var commentBlockData in _dialogueContainer.CommentBlockData)
-            {
-               var block = _graphView.CreateCommentBlock(new Rect(commentBlockData.Position, _graphView.DefaultCommentBlockSize),
-                    commentBlockData);
-               block.AddElements(Nodes.Where(x=>commentBlockData.ChildNodes.Contains(x.GUID)));
             }
         }
     }

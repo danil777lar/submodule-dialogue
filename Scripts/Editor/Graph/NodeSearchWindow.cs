@@ -45,13 +45,7 @@ namespace Larje.Dialogue.Editor
                 new SearchTreeEntry(new GUIContent("Exit Node", _indentationIcon))
                 {
                     level = 1, userData = new ExitGraphNode()
-                },
-                
-                /*new SearchTreeEntry(new GUIContent("Comment Block",_indentationIcon))
-                {
-                    level = 1,
-                    userData = new Group()
-                }*/
+                }
             };
 
             return tree;
@@ -59,20 +53,18 @@ namespace Larje.Dialogue.Editor
 
         public bool OnSelectEntry(SearchTreeEntry SearchTreeEntry, SearchWindowContext context)
         {
-            //Editor window-based mouse position
             Vector2 mousePosition = _window.rootVisualElement.ChangeCoordinatesTo(_window.rootVisualElement.parent,
                 context.screenMousePosition - _window.position.position);
+            
             Vector2 graphMousePosition = _graphView.contentViewContainer.WorldToLocal(mousePosition);
+            
             switch (SearchTreeEntry.userData)
             {
                 case GraphNode node:
-                    _graphView.CreateNewGraphNode("Node", graphMousePosition);
-                    return true;
-                case Group group:
-                    var rect = new Rect(graphMousePosition, _graphView.DefaultCommentBlockSize);
-                     _graphView.CreateCommentBlock(rect);
+                    _graphView.AddNode(node.Initialize(graphMousePosition));
                     return true;
             }
+            
             return false;
         }
     }

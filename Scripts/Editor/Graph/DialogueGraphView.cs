@@ -37,6 +37,12 @@ namespace Larje.Dialogue.Editor
             AddSearchWindow(editorWindow);
         }
 
+        public void AddNode(GraphNode node)
+        {
+            node.EventRemovePort += OnPortRemoved;
+            AddElement(node);
+        }
+        
         public void ClearBlackBoardAndExposedProperties()
         {
             ExposedProperties.Clear();
@@ -105,9 +111,17 @@ namespace Larje.Dialogue.Editor
             return compatiblePorts;
         }
 
-        public void CreateNewGraphNode(string nodeName, Vector2 position)
+        private void OnPortRemoved(Port port)
         {
-            AddElement(CreateNode(nodeName, position));
+            IEnumerable<Edge> targetEdge = edges.ToList()
+                .Where(x => x.output.portName == port.portName && x.output.node == port.node);
+            
+            if (targetEdge.Any())
+            {
+                Edge edge = targetEdge.First();
+                edge.input.Disconnect(edge);
+                RemoveElement(targetEdge.First());
+            }
         }
 
         private void AddSearchWindow(DialogueGraphEditorWindow editorWindow)
