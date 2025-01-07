@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Larje.Dialogue.Runtime.Graph.Data;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 namespace Larje.Dialogue.Editor
 {
+    [Serializable]
     public abstract class GraphNode : Node
     {
         public const int DEFAULT_NODE_WIDTH = 200;
@@ -20,10 +22,16 @@ namespace Larje.Dialogue.Editor
         public virtual GraphNode Initialize(Vector2 position, List<Node> allNodes)
         {
             title = DefaultName;
-            GUID = Guid.NewGuid().ToString();
             
+            GUID = Guid.NewGuid().ToString();
             SetPosition(new Rect(position, new Vector2(DEFAULT_NODE_WIDTH, DEFAULT_NODE_HEIGHT)));
             
+            return this;
+        }
+
+        public virtual GraphNode Load(Vector2 position)
+        {
+            SetPosition(new Rect(position, new Vector2(DEFAULT_NODE_WIDTH, DEFAULT_NODE_HEIGHT)));
             return this;
         }
         

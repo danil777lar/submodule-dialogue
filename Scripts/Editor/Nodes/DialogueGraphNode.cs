@@ -2,12 +2,14 @@
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
+using Larje.Dialogue.Runtime.Graph.Data;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Larje.Dialogue.Editor
 {
+    [Serializable]
     public class DialogueGraphNode : GraphNode
     {
         public string DialogueText;
@@ -16,32 +18,15 @@ namespace Larje.Dialogue.Editor
         public override GraphNode Initialize(Vector2 position, List<Node> allNodes)
         {
             base.Initialize(position, allNodes);
-            
             DialogueText = DefaultName;
-            styleSheets.Add(Resources.Load<StyleSheet>("Node"));
-            
-            Port inputPort = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Multi, typeof(float));
-            inputPort.portName = "Input";
-            inputContainer.Add(inputPort);
-            
-            RefreshExpandedState();
-            RefreshPorts();
-
-            TextField textField = new TextField("");
-            textField.RegisterValueChangedCallback(evt =>
-            {
-                DialogueText = evt.newValue;
-                title = evt.newValue;
-            });
-            textField.SetValueWithoutNotify(title);
-            mainContainer.Add(textField);
-
-            Button button = new Button(() => { AddChoicePort(); })
-            {
-                text = "Add Choice"
-            };
-            titleButtonContainer.Add(button);
-
+            DrawUI();
+            return this;
+        }
+        
+        public override GraphNode Load(Vector2 position)
+        {
+            base.Load(position);
+            DrawUI();
             return this;
         }
         
@@ -75,6 +60,34 @@ namespace Larje.Dialogue.Editor
             outputContainer.Add(generatedPort);
             RefreshPorts();
             RefreshExpandedState();
+        }
+
+        private void DrawUI()
+        {
+            styleSheets.Add(Resources.Load<StyleSheet>("Node"));
+            
+            Port inputPort = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Multi, typeof(float));
+            inputPort.portName = "Input";
+            inputContainer.Add(inputPort);
+            
+            RefreshExpandedState();
+            RefreshPorts();
+
+            title = DialogueText;
+            TextField textField = new TextField("");
+            textField.RegisterValueChangedCallback(evt =>
+            {
+                DialogueText = evt.newValue;
+                title = evt.newValue;
+            });
+            textField.SetValueWithoutNotify(title);
+            mainContainer.Add(textField);
+
+            Button button = new Button(() => { AddChoicePort(); })
+            {
+                text = "Add Choice"
+            };
+            titleButtonContainer.Add(button);
         }
     }
 }

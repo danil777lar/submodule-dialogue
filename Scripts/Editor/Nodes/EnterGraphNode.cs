@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor.Experimental.GraphView;
@@ -7,6 +8,7 @@ using UnityEngine.UIElements;
 
 namespace Larje.Dialogue.Editor
 {
+    [Serializable]
     public class EnterGraphNode : GraphNode
     {
         public int EnterIndex = 0; 
@@ -16,10 +18,6 @@ namespace Larje.Dialogue.Editor
         {
             base.Initialize(position, allNodes);
             
-            Port outputPort = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Multi, typeof(float));
-            outputPort.portName = "Out";
-            outputContainer.Add(outputPort);
-
             List<EnterGraphNode> otherEnterNodes = allNodes.FindAll(node => node is EnterGraphNode && node != this)
                 .ConvertAll(node => (EnterGraphNode) node).OrderBy(node => node.EnterIndex).ToList();
             for (int i = 0; i <= otherEnterNodes.Count; i++)
@@ -30,9 +28,25 @@ namespace Larje.Dialogue.Editor
                     break;
                 }
             }
-            title = $"Enter {EnterIndex}";
+
+            DrawUI();
 
             return this;
+        }
+
+        public override GraphNode Load(Vector2 position)
+        {
+            base.Load(position);
+            DrawUI();
+            return this;
+        }
+
+        private void DrawUI()
+        {
+            Port outputPort = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Multi, typeof(float));
+            outputPort.portName = "Out";
+            outputContainer.Add(outputPort);
+            title = $"Enter {EnterIndex}";
         }
     }
 }

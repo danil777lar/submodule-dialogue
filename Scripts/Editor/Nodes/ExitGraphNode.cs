@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
@@ -5,6 +6,7 @@ using UnityEngine.UIElements;
 
 namespace Larje.Dialogue.Editor
 {
+    [Serializable]
     public class ExitGraphNode : GraphNode
     {
         public int ExitIndex = 0;
@@ -13,7 +15,19 @@ namespace Larje.Dialogue.Editor
         public override GraphNode Initialize(Vector2 position, List<Node> allNodes)
         {
             base.Initialize(position, allNodes);
-            
+            DrawUI();
+            return this;
+        }
+
+        public override GraphNode Load(Vector2 position)
+        {
+            base.Load(position);
+            DrawUI();
+            return this;
+        }
+
+        private void DrawUI()
+        {
             Port inputPort = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Multi, typeof(float));
             inputPort.portName = "In";
             inputContainer.Add(inputPort);
@@ -27,8 +41,6 @@ namespace Larje.Dialogue.Editor
             });
             indexField.SetValueWithoutNotify(ExitIndex);
             mainContainer.Add(indexField);
-
-            return this;
         }
     }
 }
