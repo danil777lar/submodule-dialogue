@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
@@ -12,18 +13,17 @@ namespace Larje.Dialogue.Editor
         public string DialogueText;
         public override string DefaultName => "Dialogue Step";
 
-        public override GraphNode Initialize(Vector2 position)
+        public override GraphNode Initialize(Vector2 position, List<Node> allNodes)
         {
-            base.Initialize(position);
+            base.Initialize(position, allNodes);
             
             DialogueText = DefaultName;
-            
             styleSheets.Add(Resources.Load<StyleSheet>("Node"));
             
             Port inputPort = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Multi, typeof(float));
-            
             inputPort.portName = "Input";
             inputContainer.Add(inputPort);
+            
             RefreshExpandedState();
             RefreshPorts();
 
@@ -43,6 +43,38 @@ namespace Larje.Dialogue.Editor
             titleButtonContainer.Add(button);
 
             return this;
+        }
+        
+        public void AddChoicePort(string overriddenPortName = "")
+        {
+            Port generatedPort = InstantiatePort(Orientation.Horizontal, Direction.Output, 
+                Port.Capacity.Multi, typeof(float));
+            
+            Label portLabel = generatedPort.contentContainer.Q<Label>("type");
+            generatedPort.contentContainer.Remove(portLabel);
+
+            int outputPortCount = outputContainer.Query("connector").ToList().Count();
+            string outputPortName = string.IsNullOrEmpty(overriddenPortName)
+                ? $"Option {outputPortCount + 1}"
+                : overriddenPortName;
+
+            TextField textField = new TextField()
+            {
+                name = string.Empty,
+                value = outputPortName
+            };
+            textField.RegisterValueChangedCallback(evt => generatedPort.portName = evt.newValue);
+            generatedPort.contentContainer.Add(new Label("  "));
+            generatedPort.contentContainer.Add(textField);
+            Button deleteButton = new Button(() => RemovePort(generatedPort))
+            {
+                text = "X"
+            };
+            generatedPort.contentContainer.Add(deleteButton);
+            generatedPort.portName = outputPortName;
+            outputContainer.Add(generatedPort);
+            RefreshPorts();
+            RefreshExpandedState();
         }
     }
 }

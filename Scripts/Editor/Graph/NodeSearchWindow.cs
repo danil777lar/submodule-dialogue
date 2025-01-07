@@ -61,7 +61,7 @@ namespace Larje.Dialogue.Editor
             switch (SearchTreeEntry.userData)
             {
                 case GraphNode node:
-                    _graphView.AddNode(node.Initialize(graphMousePosition));
+                    _graphView.AddNode(node.Initialize(graphMousePosition, _graphView.nodes.ToList()));
                     return true;
             }
             

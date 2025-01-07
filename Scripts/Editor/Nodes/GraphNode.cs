@@ -1,8 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace Larje.Dialogue.Editor
 {
@@ -17,7 +17,7 @@ namespace Larje.Dialogue.Editor
         
         public abstract string DefaultName { get; }
 
-        public virtual GraphNode Initialize(Vector2 position)
+        public virtual GraphNode Initialize(Vector2 position, List<Node> allNodes)
         {
             title = DefaultName;
             GUID = Guid.NewGuid().ToString();
@@ -27,39 +27,7 @@ namespace Larje.Dialogue.Editor
             return this;
         }
         
-        public void AddChoicePort(string overriddenPortName = "")
-        {
-            Port generatedPort = InstantiatePort(Orientation.Horizontal, Direction.Output, 
-                Port.Capacity.Multi, typeof(float));
-            
-            Label portLabel = generatedPort.contentContainer.Q<Label>("type");
-            generatedPort.contentContainer.Remove(portLabel);
-
-            int outputPortCount = outputContainer.Query("connector").ToList().Count();
-            string outputPortName = string.IsNullOrEmpty(overriddenPortName)
-                ? $"Option {outputPortCount + 1}"
-                : overriddenPortName;
-
-            TextField textField = new TextField()
-            {
-                name = string.Empty,
-                value = outputPortName
-            };
-            textField.RegisterValueChangedCallback(evt => generatedPort.portName = evt.newValue);
-            generatedPort.contentContainer.Add(new Label("  "));
-            generatedPort.contentContainer.Add(textField);
-            Button deleteButton = new Button(() => RemovePort(generatedPort))
-            {
-                text = "X"
-            };
-            generatedPort.contentContainer.Add(deleteButton);
-            generatedPort.portName = outputPortName;
-            outputContainer.Add(generatedPort);
-            RefreshPorts();
-            RefreshExpandedState();
-        }
-        
-        private void RemovePort(Port port)
+        protected void RemovePort(Port port)
         {
             EventRemovePort?.Invoke(port);  
             outputContainer.Remove(port);
