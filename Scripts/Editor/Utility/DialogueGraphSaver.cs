@@ -28,17 +28,17 @@ namespace Larje.Dialogue.Editor.Utility
             container.NodeLinks = new List<LinkData>();
             container.NodeData = new List<NodeData>();
 
-            Edge[] connectedSockets = view.edges.Where(x => x.input.node != null).ToArray();
-            for (int i = 0; i < connectedSockets.Count(); i++)
+            List<Edge> edges = view.edges.ToList().FindAll(x => x.input.node != null);
+            for (int i = 0; i < edges.Count(); i++)
             {
-                GraphNode outputNode = (connectedSockets[i].output.node as GraphNode);
-                GraphNode inputNode = (connectedSockets[i].input.node as GraphNode);
+                GraphNode outputNode = (edges[i].output.node as GraphNode);
+                GraphNode inputNode = (edges[i].input.node as GraphNode);
                 container.NodeLinks.Add(new LinkData
                 {
                     FromGUID = outputNode.GUID,
-                    FromPortName = connectedSockets[i].output.portName,
+                    FromPortName = edges[i].output.portName,
                     ToGUID = inputNode.GUID,
-                    ToPortName = connectedSockets[i].input.portName
+                    ToPortName = edges[i].input.portName
                 });
             }
 

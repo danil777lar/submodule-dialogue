@@ -42,6 +42,11 @@ namespace Larje.Dialogue.Editor
             node.EventRemovePort += OnPortRemoved;
             AddElement(node);
         }
+        
+        public void AddEdge(Edge edge)
+        {
+            Add(edge);
+        }
 
         public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter)
         {

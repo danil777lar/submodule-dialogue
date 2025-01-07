@@ -8,6 +8,7 @@ using Unity.Plastic.Newtonsoft.Json;
 using UnityEditor.Experimental.GraphView;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Larje.Dialogue.Editor.Utility
 {
@@ -18,26 +19,19 @@ namespace Larje.Dialogue.Editor.Utility
             DialogueGraphContainer container = AssetDatabase.LoadAssetAtPath<DialogueGraphContainer>(assetPath);
 
             LoadNodes(container, view);
-
+            LoadEdges(container, view);
             EditorUtility.SetDirty(container);
+            EditorUtility.SetDirty(container);
+
             AssetDatabase.SaveAssets();
         }
 
         private static void LoadNodes(DialogueGraphContainer container, DialogueGraphView view)
         {
-            foreach (LinkData link in container.NodeLinks)
-            {
-                /*GraphNode outputNode = view.nodes.Find(x => x.GUID == link.FromGUID);
-                GraphNode inputNode = view.nodes.Find(x => x.GUID == link.ToGUID);
-
-                view.AddEdge(view.GenerateEdge(outputNode.outputContainer.Children().First(x => x.name == link.FromPortName) as Port,
-                    inputNode.inputContainer.Children().First(x => x.name == link.ToPortName) as Port));*/
-            }
-
             foreach (NodeData nodeData in container.NodeData)
             {
                 GraphNode node = Activator.CreateInstance(Type.GetType(nodeData.Type)) as GraphNode;
-                
+
                 foreach (NodeData.Field field in nodeData.Fields)
                 {
                     FieldInfo fieldInfo = node.GetType().GetField(field.Name);
@@ -46,8 +40,30 @@ namespace Larje.Dialogue.Editor.Utility
                         fieldInfo.SetValue(node, nodeData.GetField(field.Name));
                     }
                 }
-                
+
                 view.AddNode(node.Load(nodeData.Position));
+            }
+        }
+
+        private static void LoadEdges(DialogueGraphContainer container, DialogueGraphView view)
+        {
+            foreach (LinkData link in container.NodeLinks)
+            {
+                GraphNode outputNode = view.nodes.ToList().Find(x => ((GraphNode)x).GUID == link.FromGUID) as GraphNode;
+                GraphNode inputNode = view.nodes.ToList().Find(x => ((GraphNode)x).GUID == link.ToGUID) as GraphNode;
+
+                Edge edge = new Edge();
+                
+                edge.output = outputNode.outputContainer.Query<Port>().ToList().Find(x => x.portName == link.FromPortName);
+                edge.input = inputNode.inputContainer.Query<Port>().ToList().Find(x => x.portName == link.ToPortName);
+                
+                if (edge.output != null && edge.input != null)
+                {
+                    edge.output.Connect(edge);
+                    edge.input.Connect(edge);
+                    
+                    view.AddEdge(edge);
+                }
             }
         }
     }
