@@ -5,6 +5,7 @@ namespace Larje.Dialogue.Runtime.Converted
 {
     public class Dialogue
     {
+        public Step StartStep;
         public List<Step> Steps;
 
         public class Step
