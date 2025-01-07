@@ -67,7 +67,7 @@ namespace Larje.Dialogue.Editor.Utility
                 {
                     Name = field.Name,
                     Type = field.FieldType.ToString(),
-                    Value = field.GetValue(node).ToString()
+                    Value = field.GetValue(node)?.ToString()
                 });
             }
 

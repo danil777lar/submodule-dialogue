@@ -43,7 +43,7 @@ namespace Larje.Dialogue.Editor
 
         private void DrawUI()
         {
-            Port outputPort = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Multi, typeof(float));
+            Port outputPort = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Single, typeof(float));
             outputPort.portName = "Out";
             outputContainer.Add(outputPort);
             title = $"Enter {EnterIndex}";
