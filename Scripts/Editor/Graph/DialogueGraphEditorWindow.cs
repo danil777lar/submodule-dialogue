@@ -18,13 +18,13 @@ namespace Larje.Dialogue.Editor
         private string _assetPath = "";
         
         private DialogueGraphView _graphView;
-        private DialogueContainer _dialogueContainer;
+        private DialogueGraphContainer _dialogueContainer;
         
         [OnOpenAsset(1)]
         public static bool OpenGraphAsset(int instanceID, int line)
         {
             UnityEngine.Object asset = EditorUtility.InstanceIDToObject(instanceID);
-            if (!(asset is DialogueContainer))
+            if (!(asset is DialogueGraphContainer))
             {
                 return false;
             }
@@ -38,10 +38,9 @@ namespace Larje.Dialogue.Editor
             {
                 EditorWindow.FocusWindowIfItsOpen<DialogueGraphEditorWindow>();
             }
-
-            DialogueGraphEditorWindow window = EditorWindow.GetWindow<DialogueGraphEditorWindow>();
             
-            window.Initialize(AssetDatabase.GetAssetPath(instanceID));
+            GetWindow<DialogueGraphEditorWindow>()
+                .Initialize(AssetDatabase.GetAssetPath(instanceID));
 
             return true;
         }
@@ -50,6 +49,7 @@ namespace Larje.Dialogue.Editor
         {
             _assetPath = assetPath;
             _fileName = System.IO.Path.GetFileNameWithoutExtension(assetPath);
+            titleContent = new GUIContent(_fileName);
             
             Draw();
             LoadGraph();
@@ -60,8 +60,6 @@ namespace Larje.Dialogue.Editor
             ClearVisualElement();
             ConstructGraphView();
             GenerateToolbar();
-            //GenerateMiniMap();
-            //GenerateBlackBoard();
         }
         
         private void OnDisable()
@@ -98,15 +96,12 @@ namespace Larje.Dialogue.Editor
         
         private void LoadGraph()
         {
-            DialogueGraphEditorWindow window = GetWindow<DialogueGraphEditorWindow>();
-            window.titleContent = new GUIContent(_fileName);
-            
-            DialogueGraphSaveUtility.GetInstance(_graphView).LoadNarrative(_assetPath);
+            DialogueGraphLoader.LoadGraph(_graphView, _assetPath);
         }
 
         private void SaveGraph()
         {
-            DialogueGraphSaveUtility.GetInstance(_graphView).SaveGraph(_assetPath);
+            DialogueGraphSaver.SaveGraph(_graphView, _assetPath);
         }
 
         private void GenerateMiniMap()
@@ -115,33 +110,6 @@ namespace Larje.Dialogue.Editor
             Vector2 cords = _graphView.contentViewContainer.WorldToLocal(new Vector2(this.maxSize.x - 10, 30));
             miniMap.SetPosition(new Rect(cords.x, cords.y, 200, 140));
             _graphView.Add(miniMap);
-        }
-
-        private void GenerateBlackBoard()
-        {
-            var blackboard = new Blackboard(_graphView);
-            blackboard.Add(new BlackboardSection {title = "Exposed Variables"});
-            blackboard.addItemRequested = _blackboard =>
-            {
-                _graphView.AddPropertyToBlackBoard(ExposedProperty.CreateInstance(), false);
-            };
-            blackboard.editTextRequested = (_blackboard, element, newValue) =>
-            {
-                var oldPropertyName = ((BlackboardField) element).text;
-                if (_graphView.ExposedProperties.Any(x => x.PropertyName == newValue))
-                {
-                    EditorUtility.DisplayDialog("Error", "This property name already exists, please chose another one.",
-                        "OK");
-                    return;
-                }
-
-                var targetIndex = _graphView.ExposedProperties.FindIndex(x => x.PropertyName == oldPropertyName);
-                _graphView.ExposedProperties[targetIndex].PropertyName = newValue;
-                ((BlackboardField) element).text = newValue;
-            };
-            blackboard.SetPosition(new Rect(10,30,200,300));
-            _graphView.Add(blackboard);
-            _graphView.Blackboard = blackboard;
         }
     }
 }

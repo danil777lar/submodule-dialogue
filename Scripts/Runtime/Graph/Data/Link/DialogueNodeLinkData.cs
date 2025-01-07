@@ -2,10 +2,10 @@
 using System.Linq;
 using UnityEngine.Serialization;
 
-namespace Larje.Dialogue.Runtime.Graph
+namespace Larje.Dialogue.Runtime.Graph.Data
 {
     [Serializable]
-    public class DialogueNodeLinkData
+    public class LinkData
     {
         public string PortName;
         public string FromGUID;

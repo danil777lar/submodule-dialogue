@@ -1,33 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
+using Larje.Dialogue.Runtime.Graph.Data;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Larje.Dialogue.Runtime.Graph
 {
     [Serializable]
     [CreateAssetMenu(fileName = "New Dialogue Graph", menuName = "Larje/Dialogue/Dialogue Graph")]
-    public class DialogueContainer : ScriptableObject
+    public class DialogueGraphContainer : ScriptableObject
     {
-        public List<DialogueNodeLinkData> NodeLinks = new List<DialogueNodeLinkData>();
-        public List<DialogueNodeData> DialogueNodeData = new List<DialogueNodeData>();
-        public List<ExposedProperty> ExposedProperties = new List<ExposedProperty>();
-        public List<CommentBlockData> CommentBlockData = new List<CommentBlockData>();
+        public List<LinkData> NodeLinks = new List<LinkData>();
+        public List<NodeData> NodeData = new List<NodeData>();
 
         public Runtime.Converted.Dialogue GetDialogue()
         {
             Runtime.Converted.Dialogue dialogue = new Runtime.Converted.Dialogue();
             dialogue.Steps = new List<Runtime.Converted.Dialogue.Step>();
 
-            foreach (DialogueNodeData nodeData in DialogueNodeData)
+            foreach (NodeData nodeData in NodeData)
             {
                 Runtime.Converted.Dialogue.Step step = new Runtime.Converted.Dialogue.Step();
                 step.Id = GuidToId(nodeData.GUID);
-                step.Text = nodeData.Text;
 
                 step.Choices = new List<Runtime.Converted.Dialogue.Choice>();
-                foreach (DialogueNodeLinkData nodeLink in NodeLinks)
+                foreach (LinkData nodeLink in NodeLinks)
                 {
                     if (nodeLink.FromGUID == nodeData.GUID)
                     {
@@ -46,11 +45,11 @@ namespace Larje.Dialogue.Runtime.Graph
         
         private string GuidToId(string guid)
         {
-            foreach (DialogueNodeData nodeData in DialogueNodeData)
+            foreach (NodeData nodeData in NodeData)
             {
                 if (nodeData.GUID == guid)
                 {
-                    return DialogueNodeData.IndexOf(nodeData).ToString();
+                    return NodeData.IndexOf(nodeData).ToString();
                 }
             }
 

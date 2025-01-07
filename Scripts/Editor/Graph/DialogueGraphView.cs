@@ -30,7 +30,7 @@ namespace Larje.Dialogue.Editor
             this.AddManipulator(new RectangleSelector());
             this.AddManipulator(new FreehandSelector());
 
-            var grid = new GridBackground();
+            GridBackground grid = new GridBackground();
             Insert(0, grid);
             grid.StretchToParentSize();
             
@@ -42,70 +42,19 @@ namespace Larje.Dialogue.Editor
             node.EventRemovePort += OnPortRemoved;
             AddElement(node);
         }
-        
-        public void ClearBlackBoardAndExposedProperties()
-        {
-            ExposedProperties.Clear();
-            Blackboard.Clear();
-        }
-
-        public Group CreateCommentBlock(Rect rect, CommentBlockData commentBlockData = null)
-        {
-            if(commentBlockData==null)
-                commentBlockData = new CommentBlockData();
-            var group = new Group
-            {
-                autoUpdateGeometry = true,
-                title = commentBlockData.Title
-            };
-            AddElement(group);
-            group.SetPosition(rect);
-            return group;
-        }
-
-        public void AddPropertyToBlackBoard(ExposedProperty property, bool loadMode = false)
-        {
-            var localPropertyName = property.PropertyName;
-            var localPropertyValue = property.PropertyValue;
-            if (!loadMode)
-            {
-                while (ExposedProperties.Any(x => x.PropertyName == localPropertyName))
-                    localPropertyName = $"{localPropertyName}(1)";
-            }
-
-            var item = ExposedProperty.CreateInstance();
-            item.PropertyName = localPropertyName;
-            item.PropertyValue = localPropertyValue;
-            ExposedProperties.Add(item);
-
-            var container = new VisualElement();
-            var field = new BlackboardField {text = localPropertyName, typeText = "string"};
-            container.Add(field);
-
-            var propertyValueTextField = new TextField("Value:")
-            {
-                value = localPropertyValue
-            };
-            propertyValueTextField.RegisterValueChangedCallback(evt =>
-            {
-                var index = ExposedProperties.FindIndex(x => x.PropertyName == item.PropertyName);
-                ExposedProperties[index].PropertyValue = evt.newValue;
-            });
-            var sa = new BlackboardRow(field, propertyValueTextField);
-            container.Add(sa);
-            Blackboard.Add(container);
-        }
 
         public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter)
         {
-            var compatiblePorts = new List<Port>();
-            var startPortView = startPort;
+            List<Port> compatiblePorts = new List<Port>();
+            Port startPortView = startPort;
 
             ports.ForEach((port) =>
             {
-                var portView = port;
+                Port portView = port;
                 if (startPortView != portView && startPortView.node != portView.node)
+                {
                     compatiblePorts.Add(port);
+                }
             });
 
             return compatiblePorts;
@@ -131,28 +80,5 @@ namespace Larje.Dialogue.Editor
             nodeCreationRequest = context =>
                 SearchWindow.Open(new SearchWindowContext(context.screenMousePosition), _searchWindow);
         }
-
-        /*private DialogueNode GetEntryPointNodeInstance()
-        {
-            DialogueNode nodeCache = new DialogueNode()
-            {
-                title = "START",
-                GUID = Guid.NewGuid().ToString(),
-                DialogueText = "ENTRYPOINT",
-                EntyPoint = true
-            };
-
-            Port generatedPort = GetPortInstance(nodeCache, Direction.Output);
-            generatedPort.portName = "Next";
-            nodeCache.outputContainer.Add(generatedPort);
-
-            nodeCache.capabilities &= ~Capabilities.Movable;
-            nodeCache.capabilities &= ~Capabilities.Deletable;
-
-            nodeCache.RefreshExpandedState();
-            nodeCache.RefreshPorts();
-            nodeCache.SetPosition(new Rect(100, 200, 100, 150));
-            return nodeCache;
-        }*/
     }
 }
