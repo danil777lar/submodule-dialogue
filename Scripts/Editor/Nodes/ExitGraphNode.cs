@@ -9,7 +9,7 @@ namespace Larje.Dialogue.Editor
     {
         public int ExitIndex = 0;
         public override string DefaultName => "Exit";
-        
+
         public override GraphNode Initialize(Vector2 position, List<Node> allNodes)
         {
             base.Initialize(position, allNodes);

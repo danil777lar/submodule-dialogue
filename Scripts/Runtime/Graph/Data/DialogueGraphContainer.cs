@@ -23,15 +23,15 @@ namespace Larje.Dialogue.Runtime.Graph
             foreach (NodeData nodeData in NodeData)
             {
                 Runtime.Converted.Dialogue.Step step = new Runtime.Converted.Dialogue.Step();
-                step.Id = GuidToId(nodeData.GUID);
+                step.Id = GuidToId(nodeData.GetField<string>("GUID"));
 
                 step.Choices = new List<Runtime.Converted.Dialogue.Choice>();
                 foreach (LinkData nodeLink in NodeLinks)
                 {
-                    if (nodeLink.FromGUID == nodeData.GUID)
+                    if (nodeLink.FromGUID == nodeData.GetField<string>("GUID"))
                     {
                         Runtime.Converted.Dialogue.Choice choice = new Runtime.Converted.Dialogue.Choice();
-                        choice.Text = nodeLink.PortName;
+                        choice.Text = nodeLink.FromPortName;
                         choice.NextStepId = GuidToId(nodeLink.ToGUID);
                         step.Choices.Add(choice);
                     }
@@ -47,7 +47,7 @@ namespace Larje.Dialogue.Runtime.Graph
         {
             foreach (NodeData nodeData in NodeData)
             {
-                if (nodeData.GUID == guid)
+                if (nodeData.GetField<string>("GUID") == guid)
                 {
                     return NodeData.IndexOf(nodeData).ToString();
                 }
