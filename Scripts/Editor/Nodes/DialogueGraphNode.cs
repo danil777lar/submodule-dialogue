@@ -15,6 +15,7 @@ namespace Larje.Dialogue.Editor
         public string DialogueText;
         public string Choices;
         public override string DefaultName => "Dialogue Step";
+        protected override string StyleSheetName => "DialogueGraphNode";
 
         public override GraphNode Initialize(Vector2 position, List<Node> allNodes)
         {
@@ -44,9 +45,8 @@ namespace Larje.Dialogue.Editor
         
         private void DrawUI()
         {
-            styleSheets.Add(Resources.Load<StyleSheet>("Node"));
-            
             Port inputPort = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Multi, typeof(float));
+            inputPort.portColor = Color.white;
             inputPort.portName = "Input";
             inputContainer.Add(inputPort);
             
@@ -70,36 +70,36 @@ namespace Larje.Dialogue.Editor
 
         private void AddChoice(string choice = "", bool updateChoiceData = true)
         {
-            Port generatedPort = InstantiatePort(Orientation.Horizontal, Direction.Output,
-                Port.Capacity.Single, typeof(float));
+            Port port = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Single, typeof(float));
+            port.portColor = Color.white;
             
-            Label portLabel = generatedPort.contentContainer.Q<Label>("type");
-            generatedPort.contentContainer.Remove(portLabel);
-            generatedPort.contentContainer.Add(new Label("  "));
+            Label portLabel = port.contentContainer.Q<Label>("type");
+            port.contentContainer.Remove(portLabel);
+            port.contentContainer.Add(new Label("  "));
 
             int outputPortCount = outputContainer.Query("connector").ToList().Count();
             string outputPortName = string.IsNullOrEmpty(choice) ? $"Option {outputPortCount + 1}" : choice;
-            generatedPort.portName = outputPortName;
+            port.portName = outputPortName;
             
             TextField textField = new TextField();
             textField.name = string.Empty;
             textField.value = outputPortName;
             textField.RegisterValueChangedCallback(evt =>
             {
-                generatedPort.portName = evt.newValue;
+                port.portName = evt.newValue;
                 UpdateChoiceData();
             });
-            generatedPort.contentContainer.Add(textField);
+            port.contentContainer.Add(textField);
             
             Button deleteButton = new Button(() =>
             {
-                RemovePort(generatedPort);
+                RemovePort(port);
                 UpdateChoiceData();
             });
             deleteButton.text = "X";
-            generatedPort.contentContainer.Add(deleteButton);
+            port.contentContainer.Add(deleteButton);
             
-            outputContainer.Add(generatedPort);
+            outputContainer.Add(port);
 
             if (updateChoiceData)
             {

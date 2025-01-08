@@ -4,6 +4,7 @@ using System.Linq;
 using Larje.Dialogue.Runtime.Graph.Data;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Larje.Dialogue.Editor
 {
@@ -12,15 +13,19 @@ namespace Larje.Dialogue.Editor
     {
         public const int DEFAULT_NODE_WIDTH = 200;
         public const int DEFAULT_NODE_HEIGHT = 150;
+        public const string STYLESHEET_PATH = "DialogueGraph/";
         
         public string GUID;
 
         public event Action<Port> EventRemovePort;
         
         public abstract string DefaultName { get; }
+        protected abstract string StyleSheetName { get; }
 
         public virtual GraphNode Initialize(Vector2 position, List<Node> allNodes)
         {
+            LoadStyleSheet();
+            
             title = DefaultName;
             
             GUID = Guid.NewGuid().ToString();
@@ -31,6 +36,8 @@ namespace Larje.Dialogue.Editor
 
         public virtual GraphNode Load(Vector2 position)
         {
+            LoadStyleSheet();
+            
             SetPosition(new Rect(position, new Vector2(DEFAULT_NODE_WIDTH, DEFAULT_NODE_HEIGHT)));
             return this;
         }
@@ -41,6 +48,19 @@ namespace Larje.Dialogue.Editor
             outputContainer.Remove(port);
             RefreshPorts();
             RefreshExpandedState();
+        }
+
+        protected void LoadStyleSheet()
+        {
+            StyleSheet styleSheet = Resources.Load<StyleSheet>(STYLESHEET_PATH + StyleSheetName);
+            if (styleSheet != null)
+            {
+                styleSheets.Add(styleSheet);
+            }
+            else
+            {
+                Debug.LogWarning($"Stylesheet {STYLESHEET_PATH + StyleSheetName} was not found!");
+            }
         }
     }
 }

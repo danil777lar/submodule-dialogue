@@ -1,0 +1,5 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/Imported/submodule-dialogue/Resources/DialogueGraph/EnterGraphNode.uss?fileID=7433441132597879392&amp;guid=204186772626dfdadb396f4b7cc425e7&amp;type=3#EnterGraphNode" />
+    <Style src="project://database/Assets/Imported/submodule-dialogue/Resources/DialogueGraph/ExitGraphNode.uss?fileID=7433441132597879392&amp;guid=bb0c7643d1603937caea056628f4f89d&amp;type=3#ExitGraphNode" />
+    <Style src="project://database/Assets/Imported/submodule-dialogue/Resources/DialogueGraph/DialogueGraphNode.uss?fileID=7433441132597879392&amp;guid=de33ade2b9bf6e244a60cb1e3e66b82b&amp;type=3#DialogueGraphNode" />
+</ui:UXML>

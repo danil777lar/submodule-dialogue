@@ -13,6 +13,7 @@ namespace Larje.Dialogue.Editor
     {
         public int EnterIndex = 0; 
         public override string DefaultName => "Enter";
+        protected override string StyleSheetName => "EnterGraphNode";
 
         public override GraphNode Initialize(Vector2 position, List<Node> allNodes)
         {
@@ -44,6 +45,7 @@ namespace Larje.Dialogue.Editor
         private void DrawUI()
         {
             Port outputPort = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Single, typeof(float));
+            outputPort.portColor = new Color(0.4f, 1f, 0.4f);
             outputPort.portName = "Out";
             outputContainer.Add(outputPort);
             title = $"Enter {EnterIndex}";

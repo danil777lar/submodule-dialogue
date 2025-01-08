@@ -22,7 +22,12 @@ namespace Larje.Dialogue.Editor
 
         public DialogueGraphView(DialogueGraphEditorWindow editorWindow)
         {
-            styleSheets.Add(Resources.Load<StyleSheet>("NarrativeGraph"));
+            StyleSheet styleSheet = Resources.Load<StyleSheet>("DialogueGraph/GraphView");
+            if (styleSheet != null)
+            {
+                styleSheets.Add(styleSheet);
+            }
+
             SetupZoom(ContentZoomer.DefaultMinScale, ContentZoomer.DefaultMaxScale);
 
             this.AddManipulator(new ContentDragger());
@@ -41,6 +46,9 @@ namespace Larje.Dialogue.Editor
         {
             node.EventRemovePort += OnPortRemoved;
             AddElement(node);
+            
+            node.RefreshPorts();
+            node.RefreshExpandedState();
         }
         
         public void AddEdge(Edge edge)

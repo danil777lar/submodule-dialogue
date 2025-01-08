@@ -11,6 +11,7 @@ namespace Larje.Dialogue.Editor
     {
         public int ExitIndex = 0;
         public override string DefaultName => "Exit";
+        protected override string StyleSheetName => "ExitGraphNode";
 
         public override GraphNode Initialize(Vector2 position, List<Node> allNodes)
         {
@@ -29,6 +30,7 @@ namespace Larje.Dialogue.Editor
         private void DrawUI()
         {
             Port inputPort = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Multi, typeof(float));
+            inputPort.portColor = new Color(1f, 0.4f, 0.4f);
             inputPort.portName = "In";
             inputContainer.Add(inputPort);
             
