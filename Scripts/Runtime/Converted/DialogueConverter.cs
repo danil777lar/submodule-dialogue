@@ -40,7 +40,9 @@ namespace Larje.Dialogue.Runtime.Converted
                         {
                             Dialogue.Choice choice = new Dialogue.Choice();
                             choice.Text = nodeLink.FromPortName;
-                            choice.NextStepId = GuidToId(CheckRedirection(nodeLink.ToGUID, nodes, links), nodes);
+                            choice.Events = new List<string>();
+                            
+                            FindNextStep(choice, nodeLink.ToGUID, nodes, links);
                             step.Choices.Add(choice);
                         }
                     }
@@ -62,21 +64,50 @@ namespace Larje.Dialogue.Runtime.Converted
             return nodes.Find(x => x.GetField<string>("GUID") == link.ToGUID);
         }
 
-        private static string CheckRedirection(string guid, List<NodeData> nodes, List<LinkData> links)
+        private static void FindNextStep(Dialogue.Choice choice, string nextGuid, List<NodeData> nodes, List<LinkData> links)
         {
-            NodeData node = nodes.Find(x => x.GetField<string>("GUID") == guid);
-            
-            if (node.IsTypeOf(TYPE_EXIT))
+            NodeData nextNode = GuidToNode(nextGuid, nodes);
+
+            if (string.IsNullOrEmpty(nextGuid))
             {
-                int index = node.GetField<int>("Index");
+                return;
+            }
+            
+            if (nextNode.IsTypeOf(TYPE_DIALOGUE))
+            {
+                choice.NextStepId = GuidToId(nextGuid, nodes);
+                return;
+            }
+            
+            if (nextNode.IsTypeOf(TYPE_EVENT))
+            {
+                choice.Events.Add(nextNode.GetField<string>("EventName"));
+                
+                LinkData link = links.Find(x => x.FromGUID == nextGuid);
+                FindNextStep(choice, link != null ? link.ToGUID : "", nodes, links);
+            }
+            
+            if (nextNode.IsTypeOf(TYPE_CONDITION))
+            {
+                /*LinkData link = links.Find(x => x.FromGUID == nextGuid);
+                FindNextStep(choice, link.ToGUID, nodes, links);*/
+                return;
+            }
+            
+            if (nextNode.IsTypeOf(TYPE_EXIT))
+            {
+                int index = nextNode.GetField<int>("Index");
                 NodeData enterNode = nodes.Find(x => 
                     x.IsTypeOf(TYPE_ENTER) && x.GetField<int>("ExitIndex") == index);
                 
-                LinkData link = links.Find(x => x.FromGUID == enterNode.GetField<string>("GUID"));
-                return link.ToGUID;
+                FindNextStep(choice, enterNode != null ? enterNode.GetField<string>("GUID") : "", nodes, links);
             }
-
-            return guid;
+            
+            if (nextNode.IsTypeOf(TYPE_ENTER))
+            {
+                LinkData link = links.Find(x => x.FromGUID == nextGuid);
+                FindNextStep(choice, link != null ? link.ToGUID : "", nodes, links);
+            }
         }
         
         private static string GuidToId(string guid, List<NodeData> nodes)
@@ -90,6 +121,11 @@ namespace Larje.Dialogue.Runtime.Converted
             }
 
             return null;
+        }
+        
+        private static NodeData GuidToNode(string guid, List<NodeData> nodes)
+        {
+            return nodes.Find(x => x.GetField<string>("GUID") == guid);
         }
     }
 }
