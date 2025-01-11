@@ -19,6 +19,7 @@ namespace Larje.Dialogue.Runtime.Converted
         {
             public string Text;
             public string NextStepId;
+            public List<string> Events;
         }
     }
 }

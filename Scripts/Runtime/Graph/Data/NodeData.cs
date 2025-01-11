@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
@@ -34,6 +35,11 @@ namespace Larje.Dialogue.Runtime.Graph.Data
             }
             
             return null;
+        }
+
+        public bool IsTypeOf(string type)
+        {
+            return Type.Split(".").Last() == type.Split(".").Last();
         }
         
         [Serializable]

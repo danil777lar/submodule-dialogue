@@ -45,7 +45,17 @@ namespace Larje.Dialogue.Editor
                 new SearchTreeEntry(new GUIContent("Exit Node", _indentationIcon))
                 {
                     level = 1, userData = new ExitGraphNode()
-                }
+                },
+                
+                new SearchTreeEntry(new GUIContent("Event Node", _indentationIcon))
+                {
+                    level = 1, userData = new EventGraphNode()
+                },
+                
+                new SearchTreeEntry(new GUIContent("Condition Node", _indentationIcon))
+                {
+                    level = 1, userData = new ConditionGraphNode()
+                },
             };
 
             return tree;
