@@ -25,15 +25,15 @@ namespace Larje.Dialogue.Editor.Utility
 
         private static bool SaveNodes(DialogueGraphContainer container, DialogueGraphView view)
         {
-            container.NodeLinks = new List<LinkData>();
-            container.NodeData = new List<NodeData>();
+            container.Links = new List<LinkData>();
+            container.Nodes = new List<NodeData>();
 
             List<Edge> edges = view.edges.ToList().FindAll(x => x.input.node != null);
             for (int i = 0; i < edges.Count(); i++)
             {
                 GraphNode outputNode = (edges[i].output.node as GraphNode);
                 GraphNode inputNode = (edges[i].input.node as GraphNode);
-                container.NodeLinks.Add(new LinkData
+                container.Links.Add(new LinkData
                 {
                     FromGUID = outputNode.GUID,
                     FromPortName = edges[i].output.portName,
@@ -46,7 +46,7 @@ namespace Larje.Dialogue.Editor.Utility
             {
                 if (node is GraphNode graphNode)
                 {
-                    container.NodeData.Add(GetData(graphNode));
+                    container.Nodes.Add(GetData(graphNode));
                 }
             }
 

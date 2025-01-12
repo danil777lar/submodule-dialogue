@@ -28,7 +28,7 @@ namespace Larje.Dialogue.Editor.Utility
 
         private static void LoadNodes(DialogueGraphContainer container, DialogueGraphView view)
         {
-            foreach (NodeData nodeData in container.NodeData)
+            foreach (NodeData nodeData in container.Nodes)
             {
                 GraphNode node = Activator.CreateInstance(Type.GetType(nodeData.Type)) as GraphNode;
 
@@ -47,7 +47,7 @@ namespace Larje.Dialogue.Editor.Utility
 
         private static void LoadEdges(DialogueGraphContainer container, DialogueGraphView view)
         {
-            foreach (LinkData link in container.NodeLinks)
+            foreach (LinkData link in container.Links)
             {
                 GraphNode outputNode = view.nodes.ToList().Find(x => ((GraphNode)x).GUID == link.FromGUID) as GraphNode;
                 GraphNode inputNode = view.nodes.ToList().Find(x => ((GraphNode)x).GUID == link.ToGUID) as GraphNode;

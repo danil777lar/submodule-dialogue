@@ -24,7 +24,7 @@ public class DialogueSource : MonoBehaviour
         {
             if (c.TryCheckCondition(condition, out bool conditionResult))
             {
-                result &= conditionResult;
+                result |= conditionResult;
                 break;
             }
         }
