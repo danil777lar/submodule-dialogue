@@ -61,14 +61,15 @@ namespace Larje.Dialogue.Runtime.Graph
             {
                 return guid;
             }
+
+            string next = "";
             
             if (node.IsTypeOf(TYPE_EVENT))
             {
                 sendEvent?.Invoke(node.GetField<string>("EventName"));
                 
                 LinkData link = Links.Find(x => x.FromGUID == guid);
-                string next = link != null ? link.ToGUID : "";
-                FindNextStep(next, sendEvent, checkCondition);
+                next = link != null ? link.ToGUID : "";
             }
             
             if (node.IsTypeOf(TYPE_CONDITION))
@@ -77,8 +78,7 @@ namespace Larje.Dialogue.Runtime.Graph
                 LinkData linkFalse = Links.Find(x => x.FromGUID == guid && x.FromPortName == "False");
 
                 string conditionName = node.GetField<string>("ConditionName");
-                string next = checkCondition.Invoke(conditionName) ? linkTrue.ToGUID : linkFalse.ToGUID; 
-                FindNextStep(next, sendEvent, checkCondition);
+                next = checkCondition.Invoke(conditionName) ? linkTrue.ToGUID : linkFalse.ToGUID; 
             }
             
             if (node.IsTypeOf(TYPE_EXIT))
@@ -87,18 +87,16 @@ namespace Larje.Dialogue.Runtime.Graph
                 NodeData enterNode = Nodes.Find(x => 
                     x.IsTypeOf(TYPE_ENTER) && x.GetField<int>("EnterIndex") == exitIndex);
 
-                string next = enterNode != null ? enterNode.GetField<string>("GUID") : ""; 
-                FindNextStep(next, sendEvent, checkCondition);
+                next = enterNode != null ? enterNode.GetField<string>("GUID") : ""; 
             }
             
             if (node.IsTypeOf(TYPE_ENTER))
             {
                 LinkData link = Links.Find(x => x.FromGUID == guid);
-                string next = link != null ? link.ToGUID : ""; 
-                FindNextStep(next, sendEvent, checkCondition);
+                next = link != null ? link.ToGUID : ""; 
             }
-
-            return "";
+            
+            return FindNextStep(next, sendEvent, checkCondition);
         }
         
         private string GuidToId(string guid)
