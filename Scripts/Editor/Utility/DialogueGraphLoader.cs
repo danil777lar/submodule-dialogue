@@ -14,16 +14,30 @@ namespace Larje.Dialogue.Editor.Utility
 {
     public static class DialogueGraphLoader
     {
-        public static void LoadGraph(DialogueGraphView view, string assetPath)
+        public static DialogueGraphContainer LoadGraph(DialogueGraphView view, string assetPath)
         {
             DialogueGraphContainer container = AssetDatabase.LoadAssetAtPath<DialogueGraphContainer>(assetPath);
 
+            ClearView(view);
             LoadNodes(container, view);
             LoadEdges(container, view);
-            EditorUtility.SetDirty(container);
-            EditorUtility.SetDirty(container);
 
             AssetDatabase.SaveAssets();
+
+            return container;
+        }
+        
+        public static void LoadState(DialogueGraphView view, DialogueGraphContainer container)
+        {
+            ClearView(view);
+            LoadNodes(container, view);
+            LoadEdges(container, view);
+        }
+
+        private static void ClearView(DialogueGraphView view)
+        {
+            view.nodes.ToList().ForEach(view.RemoveElement);
+            view.edges.ToList().ForEach(view.RemoveElement);            
         }
 
         private static void LoadNodes(DialogueGraphContainer container, DialogueGraphView view)
@@ -41,7 +55,7 @@ namespace Larje.Dialogue.Editor.Utility
                     }
                 }
 
-                view.AddNode(node.Load(nodeData.Position));
+                view.AddNode(node.Load(nodeData.Position), false);
             }
         }
 
@@ -62,7 +76,7 @@ namespace Larje.Dialogue.Editor.Utility
                     edge.output.Connect(edge);
                     edge.input.Connect(edge);
                     
-                    view.AddEdge(edge);
+                    view.AddEdge(edge, false);
                 }
             }
         }

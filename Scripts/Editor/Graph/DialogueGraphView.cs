@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Larje.Dialogue.Editor.Utility;
 using Larje.Dialogue.Runtime.Graph;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
@@ -14,14 +15,15 @@ namespace Larje.Dialogue.Editor
 {
     public class DialogueGraphView : GraphView
     {
-        public readonly Vector2 DefaultCommentBlockSize = new Vector2(300, 200);
-        
-        public Blackboard Blackboard = new Blackboard();
-        public List<ExposedProperty> ExposedProperties { get; private set; } = new List<ExposedProperty>();
+        private string _assetPath;
         private NodeSearchWindow _searchWindow;
+        private DialogueGraphContainer _savedRecord;
+        private DialogueGraphContainer _currentRecord;
+        private Dictionary<DialogueGraphContainer, string> _undoStack = new Dictionary<DialogueGraphContainer, string>();
 
-        public DialogueGraphView(DialogueGraphEditorWindow editorWindow)
+        public DialogueGraphView(DialogueGraphEditorWindow editorWindow, string assetPath)
         {
+            _assetPath = assetPath;
             StyleSheet styleSheet = Resources.Load<StyleSheet>("DialogueGraph/GraphView");
             if (styleSheet != null)
             {
@@ -42,18 +44,28 @@ namespace Larje.Dialogue.Editor
             AddSearchWindow(editorWindow);
         }
 
-        public void AddNode(GraphNode node)
+        public void AddNode(GraphNode node, bool notify = true)
         {
             node.EventRemovePort += OnPortRemoved;
             AddElement(node);
             
             node.RefreshPorts();
             node.RefreshExpandedState();
+            
+            if (notify)
+            {
+                Record("Add Node");
+            }
         }
         
-        public void AddEdge(Edge edge)
+        public void AddEdge(Edge edge, bool notify = true)
         {
             Add(edge);
+            
+            if (notify)
+            {
+                Record("Add Edge");
+            }
         }
 
         public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter)
@@ -71,6 +83,78 @@ namespace Larje.Dialogue.Editor
             });
 
             return compatiblePorts;
+        }
+        
+        public void Save()
+        {
+            _savedRecord = DialogueGraphSaver.SaveGraph(this, _assetPath);
+            _undoStack.Clear();
+            _currentRecord = _savedRecord;
+        }
+
+        public void Load()
+        {
+            _savedRecord = DialogueGraphLoader.LoadGraph(this, _assetPath);
+            _undoStack.Clear();
+            _currentRecord = _savedRecord;
+        }
+
+        public void Record(string actionName)
+        {
+            DialogueGraphContainer newState;
+            if (DialogueGraphSaver.TrySaveState(this, _currentRecord, out newState))
+            {
+                _undoStack.Add(newState, actionName);
+                _currentRecord = newState;
+            }
+
+            LogUndoCurrentStack();
+        }
+        
+        public void Undo()
+        {
+            if (_undoStack.Count > 0 && _currentRecord != null && _currentRecord != _savedRecord)
+            {
+                int index = _undoStack.Keys.ToList().IndexOf(_currentRecord);
+                if (index > 0)
+                {
+                    _currentRecord = _undoStack.Keys.ToList()[index - 1];
+                }
+                else
+                {
+                    _currentRecord = _savedRecord;
+                }
+                DialogueGraphLoader.LoadState(this, _currentRecord);
+            }            
+            
+            LogUndoCurrentStack();
+        }
+
+        public void Redo()
+        {
+            if (_currentRecord != null)
+            {
+                int index = _undoStack.Keys.ToList().IndexOf(_currentRecord);
+                if (index < _undoStack.Count - 1)
+                {
+                    _currentRecord = _undoStack.Keys.ToList()[index + 1];
+                    DialogueGraphLoader.LoadState(this, _currentRecord);
+                }
+            }
+            
+            LogUndoCurrentStack();
+        }
+
+        private void LogUndoCurrentStack()
+        {
+            string debug = "";
+            foreach (KeyValuePair<DialogueGraphContainer, string> record in _undoStack)
+            {
+                string marker = _currentRecord == record.Key ? "=>    " : "";
+                debug += $"{marker}{record.Value} \n";
+            }
+
+            Debug.Log(debug);
         }
 
         private void OnPortRemoved(Port port)

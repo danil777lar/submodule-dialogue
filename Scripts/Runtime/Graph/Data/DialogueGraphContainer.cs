@@ -48,6 +48,11 @@ namespace Larje.Dialogue.Runtime.Graph
             return NodeToStep(nextNode);
         }
 
+        public bool Compare(DialogueGraphContainer other)
+        {
+            return Nodes.SequenceEqual(other.Nodes) && Links.SequenceEqual(other.Links);
+        }
+
         private string FindNextStep(string guid, Action<string> sendEvent, Func<string, bool> checkCondition)
         {
             NodeData node = GuidToNode(guid);

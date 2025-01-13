@@ -24,6 +24,8 @@ namespace Larje.Dialogue.Editor
         public override GraphNode Load(Vector2 position)
         {
             base.Load(position);
+            
+            
             DrawUI();
             return this;
         }
@@ -46,6 +48,8 @@ namespace Larje.Dialogue.Editor
                 EventName = evt.newValue;
                 title = $"{EventName}";
             });
+
+            title = EventName; 
             textField.SetValueWithoutNotify(title);
             mainContainer.Add(textField);
             

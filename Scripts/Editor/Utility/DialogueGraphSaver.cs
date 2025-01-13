@@ -13,7 +13,7 @@ namespace Larje.Dialogue.Editor.Utility
 {
     public static class DialogueGraphSaver
     {
-        public static void SaveGraph(DialogueGraphView view, string assetPath)
+        public static DialogueGraphContainer SaveGraph(DialogueGraphView view, string assetPath)
         {
             DialogueGraphContainer container = AssetDatabase.LoadAssetAtPath<DialogueGraphContainer>(assetPath);
 
@@ -21,6 +21,16 @@ namespace Larje.Dialogue.Editor.Utility
 
             EditorUtility.SetDirty(container);
             AssetDatabase.SaveAssets();
+
+            return container;
+        }
+        
+        public static bool TrySaveState(DialogueGraphView view, DialogueGraphContainer prevState, out DialogueGraphContainer newState)
+        {
+            newState = ScriptableObject.CreateInstance<DialogueGraphContainer>();
+            SaveNodes(newState, view);
+
+            return true; //!prevState.Compare(newState);
         }
 
         private static bool SaveNodes(DialogueGraphContainer container, DialogueGraphView view)

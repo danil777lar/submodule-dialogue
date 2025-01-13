@@ -80,7 +80,7 @@ namespace Larje.Dialogue.Editor
 
         private void ConstructGraphView()
         {
-            _graphView = new DialogueGraphView(this)
+            _graphView = new DialogueGraphView(this, _assetPath)
             {
                 name = _fileName,
             };
@@ -91,18 +91,24 @@ namespace Larje.Dialogue.Editor
         private void GenerateToolbar()
         {
             Toolbar toolbar = new Toolbar();
+            
             toolbar.Add(new Button(SaveGraph) {text = "Save"});
+            
+            toolbar.Add(new Button(_graphView.Undo) {text = "<-"});
+            toolbar.Add(new Button(_graphView.Redo) {text = "->"});
+            
+            
             rootVisualElement.Add(toolbar);
         }
         
         private void LoadGraph()
         {
-            DialogueGraphLoader.LoadGraph(_graphView, _assetPath);
+            _graphView.Load();
         }
 
         private void SaveGraph()
         {
-            DialogueGraphSaver.SaveGraph(_graphView, _assetPath);
+            _graphView.Save();
         }
 
         private void GenerateMiniMap()

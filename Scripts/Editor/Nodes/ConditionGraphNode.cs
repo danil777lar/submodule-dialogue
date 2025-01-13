@@ -51,6 +51,8 @@ namespace Larje.Dialogue.Editor
                 ConditionName = evt.newValue;
                 title = $"{ConditionName}";
             });
+            
+            title = ConditionName;
             textField.SetValueWithoutNotify(title);
             mainContainer.Add(textField);
             
