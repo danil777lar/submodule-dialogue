@@ -17,6 +17,9 @@ namespace Larje.Dialogue.Editor
     {
         private string _fileName = "New Narrative";
         private string _assetPath = "";
+
+        private Button _undoButton;
+        private Button _redoButton;
         
         private DialogueGraphView _graphView;
         private DialogueGraphContainer _dialogueContainer;
@@ -54,6 +57,12 @@ namespace Larje.Dialogue.Editor
             
             Draw();
             LoadGraph();
+        }
+
+        private void Update()
+        {
+            _undoButton.SetEnabled(_graphView.CanUndo);
+            _redoButton.SetEnabled(_graphView.CanRedo);            
         }
 
         private void Draw()
@@ -94,8 +103,11 @@ namespace Larje.Dialogue.Editor
             
             toolbar.Add(new Button(SaveGraph) {text = "Save"});
             
-            toolbar.Add(new Button(_graphView.Undo) {text = "<-"});
-            toolbar.Add(new Button(_graphView.Redo) {text = "->"});
+            _undoButton = new Button(_graphView.Undo) {text = "<-"};
+            toolbar.Add(_undoButton);
+            
+            _redoButton = new Button(_graphView.Redo) {text = "->"};
+            toolbar.Add(_redoButton);
             
             
             rootVisualElement.Add(toolbar);

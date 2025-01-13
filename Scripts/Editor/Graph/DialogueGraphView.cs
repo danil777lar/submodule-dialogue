@@ -20,6 +20,10 @@ namespace Larje.Dialogue.Editor
         private DialogueGraphContainer _savedRecord;
         private DialogueGraphContainer _currentRecord;
         private Dictionary<DialogueGraphContainer, string> _undoStack = new Dictionary<DialogueGraphContainer, string>();
+        
+        public int CurrentRecordIndex => _undoStack.Keys.ToList().IndexOf(_currentRecord);
+        public bool CanUndo => _undoStack.Count > 0 && _currentRecord != null && _currentRecord != _savedRecord;
+        public bool CanRedo => _currentRecord != null && CurrentRecordIndex < _undoStack.Count - 1; 
 
         public DialogueGraphView(DialogueGraphEditorWindow editorWindow, string assetPath)
         {
@@ -104,6 +108,11 @@ namespace Larje.Dialogue.Editor
             DialogueGraphContainer newState;
             if (DialogueGraphSaver.TrySaveState(this, _currentRecord, out newState))
             {
+                while (CurrentRecordIndex < _undoStack.Count - 1)
+                {
+                    _undoStack.Remove(_undoStack.Keys.Last());
+                }
+                
                 _undoStack.Add(newState, actionName);
                 _currentRecord = newState;
             }
@@ -113,12 +122,11 @@ namespace Larje.Dialogue.Editor
         
         public void Undo()
         {
-            if (_undoStack.Count > 0 && _currentRecord != null && _currentRecord != _savedRecord)
+            if (CanUndo)
             {
-                int index = _undoStack.Keys.ToList().IndexOf(_currentRecord);
-                if (index > 0)
+                if (CurrentRecordIndex > 0)
                 {
-                    _currentRecord = _undoStack.Keys.ToList()[index - 1];
+                    _currentRecord = _undoStack.Keys.ToList()[CurrentRecordIndex - 1];
                 }
                 else
                 {
@@ -132,14 +140,10 @@ namespace Larje.Dialogue.Editor
 
         public void Redo()
         {
-            if (_currentRecord != null)
+            if (CanRedo)
             {
-                int index = _undoStack.Keys.ToList().IndexOf(_currentRecord);
-                if (index < _undoStack.Count - 1)
-                {
-                    _currentRecord = _undoStack.Keys.ToList()[index + 1];
-                    DialogueGraphLoader.LoadState(this, _currentRecord);
-                }
+                _currentRecord = _undoStack.Keys.ToList()[CurrentRecordIndex + 1];
+                DialogueGraphLoader.LoadState(this, _currentRecord);
             }
             
             LogUndoCurrentStack();
