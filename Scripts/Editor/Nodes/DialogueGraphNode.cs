@@ -3,8 +3,10 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using Larje.Dialogue.Runtime.Graph.Data;
+using Unity.Plastic.Newtonsoft.Json;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UIElements;
 
 namespace Larje.Dialogue.Editor
@@ -12,16 +14,24 @@ namespace Larje.Dialogue.Editor
     [Serializable]
     public class DialogueGraphNode : GraphNode
     {
-        public string DialogueText;
-        public string Choices;
+        [JsonRequired] public DialogueContent Content; 
+            
         public override string DefaultName => "Dialogue Step";
         protected override string StyleSheetName => "DialogueGraphNode";
 
         public override GraphNode Initialize(Vector2 position, List<Node> allNodes)
         {
             base.Initialize(position, allNodes);
+
+            Content = new DialogueContent();
+            Content.Speeches = new List<Speech>();
+            Content.Speeches.Add(new Speech()
+            {
+                LanguageCode = "en",
+                Title = "Title",
+                Text = "Text"
+            });
             
-            DialogueText = DefaultName;
             DrawUI();
             return this;
         }
@@ -30,15 +40,6 @@ namespace Larje.Dialogue.Editor
         {
             base.Load(position);
             DrawUI();
-
-            if (!string.IsNullOrEmpty(Choices))
-            {
-                string[] choiceData = Choices.Split('/');
-                for (int i = 0; i < choiceData.Length; i++)
-                {
-                    AddChoice(choiceData[i], false);
-                }
-            }
 
             return this;
         }
@@ -53,18 +54,8 @@ namespace Larje.Dialogue.Editor
             RefreshExpandedState();
             RefreshPorts();
 
-            title = DialogueText;
-            TextField textField = new TextField("");
-            textField.RegisterValueChangedCallback(evt =>
-            {
-                DialogueText = evt.newValue;
-                title = evt.newValue;
-            });
-            textField.SetValueWithoutNotify(title);
-            mainContainer.Add(textField);
-
-            Button button = new Button(() => AddChoice());
-            button.text = "Add Choice";
+            Button button = new Button(() => DialogueGraphNodeWindow.OpenWindow(this));
+            button.text = "Edit";
             titleButtonContainer.Add(button);
         }
 
@@ -81,24 +72,8 @@ namespace Larje.Dialogue.Editor
             string outputPortName = string.IsNullOrEmpty(choice) ? $"Option {outputPortCount + 1}" : choice;
             port.portName = outputPortName;
             
-            TextField textField = new TextField();
-            textField.name = string.Empty;
-            textField.value = outputPortName;
-            textField.RegisterValueChangedCallback(evt =>
-            {
-                port.portName = evt.newValue;
-                UpdateChoiceData();
-            });
-            port.contentContainer.Add(textField);
-            
-            Button deleteButton = new Button(() =>
-            {
-                RemovePort(port);
-                UpdateChoiceData();
-            });
-            deleteButton.text = "X";
-            port.contentContainer.Add(deleteButton);
-            
+            Label label = new Label(outputPortName);
+            port.contentContainer.Add(label);
             outputContainer.Add(port);
 
             if (updateChoiceData)
@@ -112,7 +87,7 @@ namespace Larje.Dialogue.Editor
 
         private void UpdateChoiceData()
         {
-            Choices = string.Empty;
+            /*Choices = string.Empty;
             List<Port> ports = outputContainer.Query<Port>().ToList();
             foreach (Port port in ports)
             {
@@ -124,7 +99,21 @@ namespace Larje.Dialogue.Editor
                         Choices += "/";
                     }
                 }
-            }
+            }*/
+        }
+
+        [Serializable]
+        public class DialogueContent
+        {
+            public List<Speech> Speeches;
+        }
+        
+        [Serializable]
+        public class Speech
+        {
+            public string LanguageCode;
+            public string Title;
+            public string Text;
         }
     }
 }

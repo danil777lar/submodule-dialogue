@@ -73,12 +73,26 @@ namespace Larje.Dialogue.Editor.Utility
             data.Fields = new List<NodeData.Field>();
             foreach (FieldInfo field in node.GetType().GetFields())
             {
-                data.Fields.Add(new NodeData.Field
+                NodeData.Field fieldData = new NodeData.Field
                 {
                     Name = field.Name,
                     Type = field.FieldType.ToString(),
-                    Value = field.GetValue(node)?.ToString()
-                });
+                    Assembly = field.FieldType.Assembly.FullName
+                };
+                
+
+                if (field.CustomAttributes.Any(x => x.AttributeType == typeof(JsonRequiredAttribute)))
+                {
+                    fieldData.Value = JsonUtility.ToJson(field.GetValue(node));
+                    fieldData.IsJson = true;
+                }
+                else
+                {
+                    fieldData.Value = field.GetValue(node)?.ToString();
+                    fieldData.IsJson = false;
+                }
+                
+                data.Fields.Add(fieldData);
             }
 
             return data;

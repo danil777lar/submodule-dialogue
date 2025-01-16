@@ -51,7 +51,8 @@ namespace Larje.Dialogue.Editor.Utility
                     FieldInfo fieldInfo = node.GetType().GetField(field.Name);
                     if (fieldInfo != null)
                     {
-                        fieldInfo.SetValue(node, nodeData.GetField(field.Name));
+                        object value = nodeData.GetField(field.Name);
+                        fieldInfo.SetValue(node, value);   
                     }
                 }
 

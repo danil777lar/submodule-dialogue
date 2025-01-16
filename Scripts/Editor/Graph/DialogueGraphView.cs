@@ -157,8 +157,6 @@ namespace Larje.Dialogue.Editor
                 string marker = _currentRecord == record.Key ? "=>    " : "";
                 debug += $"{marker}{record.Value} \n";
             }
-
-            Debug.Log(debug);
         }
 
         private void OnPortRemoved(Port port)
