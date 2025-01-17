@@ -24,12 +24,25 @@ namespace Larje.Dialogue.Editor
             base.Initialize(position, allNodes);
 
             Content = new DialogueContent();
-            Content.Speeches = new List<Speech>();
-            Content.Speeches.Add(new Speech()
+            Content.Localizations = new List<DialogueLocalization>();
+            Content.Localizations.Add(new DialogueLocalization()
             {
                 LanguageCode = "en",
-                Title = "Title",
-                Text = "Text"
+                Speech = new Speech()
+                {
+                    Title = "Title",
+                    Text = "Text"
+                },
+            });
+            
+            Content.Localizations.Add(new DialogueLocalization()
+            {
+                LanguageCode = "ru",
+                Speech = new Speech()
+                {
+                    Title = "Заголовок",
+                    Text = "Текст"
+                },
             });
             
             DrawUI();
@@ -46,6 +59,8 @@ namespace Larje.Dialogue.Editor
         
         private void DrawUI()
         {
+            title = Content.Localizations.First().Speech.Title;
+            
             Port inputPort = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Multi, typeof(float));
             inputPort.portColor = Color.white;
             inputPort.portName = "Input";
@@ -105,13 +120,20 @@ namespace Larje.Dialogue.Editor
         [Serializable]
         public class DialogueContent
         {
-            public List<Speech> Speeches;
+            [FormerlySerializedAs("Speeches")] public List<DialogueLocalization> Localizations;
         }
         
         [Serializable]
-        public class Speech
+        public class DialogueLocalization
         {
             public string LanguageCode;
+            public Speech Speech;
+            public List<Speech> Choices;
+        }
+
+        [Serializable]
+        public class Speech
+        {
             public string Title;
             public string Text;
         }
