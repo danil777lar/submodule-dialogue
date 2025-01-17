@@ -116,26 +116,5 @@ namespace Larje.Dialogue.Editor
                 }
             }*/
         }
-
-        [Serializable]
-        public class DialogueContent
-        {
-            [FormerlySerializedAs("Speeches")] public List<DialogueLocalization> Localizations;
-        }
-        
-        [Serializable]
-        public class DialogueLocalization
-        {
-            public string LanguageCode;
-            public Speech Speech;
-            public List<Speech> Choices;
-        }
-
-        [Serializable]
-        public class Speech
-        {
-            public string Title;
-            public string Text;
-        }
     }
 }
