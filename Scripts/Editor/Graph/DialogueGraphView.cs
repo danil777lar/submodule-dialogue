@@ -156,11 +156,19 @@ namespace Larje.Dialogue.Editor
         public void Update()
         {
             List<GraphNode> selectedNodes = selection.FindAll(x => x is GraphNode).Cast<GraphNode>().ToList();
-            if (selectedNodes.Count == 1 && _selectedNode != selectedNodes.First())
+            if (selectedNodes.Count == 1)
             {
-                _selectedNode = selectedNodes.First();
-                _selectedNode.DrawPanelUI(_nodeDataPanel);
-            }     
+                if (_selectedNode != selectedNodes.First())
+                {
+                    _selectedNode = selectedNodes.First();
+                    _selectedNode.DrawPanelUI(_nodeDataPanel);
+                }
+            }
+            else
+            {
+                _selectedNode = null;
+                _nodeDataPanel.Clear();
+            }
         }
 
         private void LogUndoCurrentStack()

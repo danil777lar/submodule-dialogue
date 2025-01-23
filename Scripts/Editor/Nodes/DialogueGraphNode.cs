@@ -27,26 +27,7 @@ namespace Larje.Dialogue.Editor
             base.Initialize(position, allNodes);
 
             Content = new DialogueContent();
-            Content.Localizations = new List<DialogueLocalization>();
-            Content.Localizations.Add(new DialogueLocalization()
-            {
-                LanguageCode = "en",
-                Speech = new Speech()
-                {
-                    Title = "Title",
-                    Text = "Text"
-                },
-            });
-            
-            Content.Localizations.Add(new DialogueLocalization()
-            {
-                LanguageCode = "ru",
-                Speech = new Speech()
-                {
-                    Title = "Заголовок",
-                    Text = "Текст"
-                },
-            });
+            Content.Init();
             
             DrawUI();
             return this;
@@ -62,7 +43,7 @@ namespace Larje.Dialogue.Editor
         
         private void DrawUI()
         {
-            title = Content.Localizations.First().Speech.Title;
+            title = Content.GetLocalization(0).InterlocutorSpeech.Title;
             
             Port inputPort = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Multi, typeof(float));
             inputPort.portColor = Color.white;
