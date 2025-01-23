@@ -14,6 +14,7 @@ namespace Larje.Dialogue.Editor
         public int EnterIndex = 0; 
         public override string DefaultName => "Enter";
         protected override string StyleSheetName => "EnterGraphNode";
+        public override GraphNodePanel GetPanelInstance => new EnterGraphNodePanel(this);
 
         public override GraphNode Initialize(Vector2 position, List<Node> allNodes)
         {

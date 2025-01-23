@@ -1,49 +1,28 @@
 using System;
 using System.Collections.Generic;
 using Larje.Dialogue.Editor;
-using Larje.Dialogue.Runtime.Converted;
-using PlasticGui.WorkspaceWindow.CodeReview;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
-using Action = System.Action;
 
-public class DialogueGraphNodeWindow : EditorWindow
+public class DialogueGraphNodePanel : GraphNodePanel
 {
-    private const float WIDTH = 400f;
-    private const float HEIGHT = 500f;
-
     private int _selectedLangIndex;
     private DialogueGraphNode _node;
     private Dictionary<string, bool> _foldouts = new Dictionary<string, bool>();
     
-    public static void OpenWindow(DialogueGraphNode node)
-    {
-        bool windowIsOpen = EditorWindow.HasOpenInstances<DialogueGraphNodeWindow>();
-        if (!windowIsOpen)
-        {
-            EditorWindow.CreateWindow<DialogueGraphNodeWindow>();
-        }
-        else
-        {
-            EditorWindow.FocusWindowIfItsOpen<DialogueGraphNodeWindow>();
-        }
-            
-        GetWindow<DialogueGraphNodeWindow>()
-            .Initialize(node);
-    }
-
-    public void Initialize(DialogueGraphNode node)
+    public DialogueGraphNodePanel(DialogueGraphNode node)
     {
         _node = node;
-        maxSize = new Vector2(WIDTH, HEIGHT);
-        minSize = maxSize;
+    }
+
+    public override void Draw(VisualElement root)
+    {
+        base.Draw(root);
     }
     
     private void OnGUI()
     {
-        titleContent.text = $"Dialogue Node: {_node.Content.Localizations[0].Speech.Title}";
-        
         DrawToolbar();
         DrawLocalization();
     }

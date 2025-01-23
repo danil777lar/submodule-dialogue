@@ -17,15 +17,19 @@ namespace Larje.Dialogue.Editor
         
         public string GUID;
 
+        protected GraphNodePanel _panel;
+
         public event Action<Port> EventRemovePort;
         
         public abstract string DefaultName { get; }
         protected abstract string StyleSheetName { get; }
+        public virtual GraphNodePanel GetPanelInstance => null;
 
         public virtual GraphNode Initialize(Vector2 position, List<Node> allNodes)
         {
             LoadStyleSheet();
-            
+
+            _panel = GetPanelInstance;
             title = DefaultName;
             
             GUID = Guid.NewGuid().ToString();
@@ -36,10 +40,18 @@ namespace Larje.Dialogue.Editor
 
         public virtual GraphNode Load(Vector2 position)
         {
+            _panel = GetPanelInstance;
+            
             LoadStyleSheet();
             
             SetPosition(new Rect(position, new Vector2(DEFAULT_NODE_WIDTH, DEFAULT_NODE_HEIGHT)));
             return this;
+        }
+
+        public virtual void DrawPanelUI(VisualElement root)
+        {
+            root.Clear();
+            _panel?.Draw(root);
         }
         
         protected void RemovePort(Port port)

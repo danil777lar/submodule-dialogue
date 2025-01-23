@@ -16,8 +16,11 @@ namespace Larje.Dialogue.Editor
     {
         [JsonRequired] public DialogueContent Content; 
             
+        private DialogueGraphNodePanel _panel;
+        
         public override string DefaultName => "Dialogue Step";
         protected override string StyleSheetName => "DialogueGraphNode";
+        public override GraphNodePanel GetPanelInstance => new DialogueGraphNodePanel(this);
 
         public override GraphNode Initialize(Vector2 position, List<Node> allNodes)
         {
@@ -68,10 +71,6 @@ namespace Larje.Dialogue.Editor
             
             RefreshExpandedState();
             RefreshPorts();
-
-            Button button = new Button(() => DialogueGraphNodeWindow.OpenWindow(this));
-            button.text = "Edit";
-            titleButtonContainer.Add(button);
         }
 
         private void AddChoice(string choice = "", bool updateChoiceData = true)

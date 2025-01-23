@@ -16,18 +16,22 @@ namespace Larje.Dialogue.Editor
     public class DialogueGraphView : GraphView
     {
         private string _assetPath;
+        private VisualElement _nodeDataPanel;
         private NodeSearchWindow _searchWindow;
         private DialogueGraphContainer _savedRecord;
         private DialogueGraphContainer _currentRecord;
+        private GraphNode _selectedNode;
         private Dictionary<DialogueGraphContainer, string> _undoStack = new Dictionary<DialogueGraphContainer, string>();
         
         public int CurrentRecordIndex => _undoStack.Keys.ToList().IndexOf(_currentRecord);
         public bool CanUndo => _undoStack.Count > 0 && _currentRecord != null && _currentRecord != _savedRecord;
-        public bool CanRedo => _currentRecord != null && CurrentRecordIndex < _undoStack.Count - 1; 
+        public bool CanRedo => _currentRecord != null && CurrentRecordIndex < _undoStack.Count - 1;
 
-        public DialogueGraphView(DialogueGraphEditorWindow editorWindow, string assetPath)
+        public DialogueGraphView(DialogueGraphEditorWindow editorWindow, string assetPath, VisualElement nodeDataPanel)
         {
             _assetPath = assetPath;
+            _nodeDataPanel = nodeDataPanel;
+            
             StyleSheet styleSheet = Resources.Load<StyleSheet>("DialogueGraph/GraphView");
             if (styleSheet != null)
             {
@@ -44,7 +48,7 @@ namespace Larje.Dialogue.Editor
             GridBackground grid = new GridBackground();
             Insert(0, grid);
             grid.StretchToParentSize();
-            
+
             AddSearchWindow(editorWindow);
         }
 
@@ -147,6 +151,16 @@ namespace Larje.Dialogue.Editor
             }
             
             LogUndoCurrentStack();
+        }
+
+        public void Update()
+        {
+            List<GraphNode> selectedNodes = selection.FindAll(x => x is GraphNode).Cast<GraphNode>().ToList();
+            if (selectedNodes.Count == 1 && _selectedNode != selectedNodes.First())
+            {
+                _selectedNode = selectedNodes.First();
+                _selectedNode.DrawPanelUI(_nodeDataPanel);
+            }     
         }
 
         private void LogUndoCurrentStack()

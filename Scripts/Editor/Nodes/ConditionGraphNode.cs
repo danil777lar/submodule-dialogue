@@ -13,6 +13,7 @@ namespace Larje.Dialogue.Editor
         
         public override string DefaultName => "Condition";
         protected override string StyleSheetName => "ConditionGraphNode";
+        public override GraphNodePanel GetPanelInstance => new ConditionGraphNodePanel(this);
         
         public override GraphNode Initialize(Vector2 position, List<Node> allNodes)
         {

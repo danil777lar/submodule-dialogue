@@ -12,6 +12,8 @@ namespace Larje.Dialogue.Editor
         public int ExitIndex = 0;
         public override string DefaultName => "Exit";
         protected override string StyleSheetName => "ExitGraphNode";
+        public override GraphNodePanel GetPanelInstance => new ExitGraphNodePanel(this);
+
 
         public override GraphNode Initialize(Vector2 position, List<Node> allNodes)
         {

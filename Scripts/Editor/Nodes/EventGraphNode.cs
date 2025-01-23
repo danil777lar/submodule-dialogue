@@ -13,6 +13,7 @@ namespace Larje.Dialogue.Editor
         
         public override string DefaultName => "Event";
         protected override string StyleSheetName => "EventGraphNode";
+        public override GraphNodePanel GetPanelInstance => new EventGraphNodePanel(this);
         
         public override GraphNode Initialize(Vector2 position, List<Node> allNodes)
         {

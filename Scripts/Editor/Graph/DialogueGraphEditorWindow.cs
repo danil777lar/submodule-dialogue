@@ -21,6 +21,10 @@ namespace Larje.Dialogue.Editor
         private Button _undoButton;
         private Button _redoButton;
         
+        private TwoPaneSplitView _splitView;
+        private VisualElement _splitLeft;
+        private VisualElement _splitRight;
+        
         private DialogueGraphView _graphView;
         private DialogueGraphContainer _dialogueContainer;
         
@@ -63,6 +67,7 @@ namespace Larje.Dialogue.Editor
         {
             _undoButton.SetEnabled(_graphView.CanUndo);
             _redoButton.SetEnabled(_graphView.CanRedo);            
+            _graphView?.Update();
         }
 
         private void Draw()
@@ -85,16 +90,25 @@ namespace Larje.Dialogue.Editor
         private void ClearVisualElement()
         {
             rootVisualElement.Clear();
+            
+            _splitView = new TwoPaneSplitView(1, 250, TwoPaneSplitViewOrientation.Horizontal);
+            rootVisualElement.Add(_splitView);
+            
+            _splitLeft = new VisualElement();
+            _splitView.Add(_splitLeft);
+            
+            _splitRight = new VisualElement();
+            _splitView.Add(_splitRight);
         }
 
         private void ConstructGraphView()
         {
-            _graphView = new DialogueGraphView(this, _assetPath)
+            _graphView = new DialogueGraphView(this, _assetPath, _splitRight)
             {
                 name = _fileName,
             };
             _graphView.StretchToParentSize();
-            rootVisualElement.Add(_graphView);
+            _splitLeft.Add(_graphView);
         }
 
         private void GenerateToolbar()
@@ -110,7 +124,7 @@ namespace Larje.Dialogue.Editor
             toolbar.Add(_redoButton);
             
             
-            rootVisualElement.Add(toolbar);
+            _splitLeft.Add(toolbar);
         }
         
         private void LoadGraph()
