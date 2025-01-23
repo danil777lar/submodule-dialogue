@@ -40,61 +40,93 @@ namespace Larje.Dialogue.Editor
 
             return this;
         }
+
+        public void UpdateTitle()
+        {
+            title = Content.GetLocalization(0).InterlocutorSpeech.Title;
+        }
+        
+        public void UpdatePorts()
+        {
+            int index = 0;
+
+            List<DialogueChoice> choices = Content.GetLocalization(0).PlayerChoices;
+            while (outputContainer.childCount > choices.Count)
+            {
+                Port portToRemove = outputContainer[outputContainer.childCount - 1] as Port; 
+                RemovePort(portToRemove);
+            }
+
+            index = 0;
+            while (outputContainer.childCount < choices.Count)
+            {
+                AddPort("Choice", index);
+                index++;
+            }
+
+            index = 0;
+            foreach (DialogueChoice choice in choices)
+            {
+                Port port = outputContainer[index] as Port;
+                if (port != null)
+                {
+                    port.name = index.ToString();
+                    port.portName = index.ToString();
+                    
+                    RenamePort(port, choice.PlayerSpeech.Title);
+                }
+
+                index++;
+            }
+            
+            RefreshPorts();
+        }
         
         private void DrawUI()
         {
-            title = Content.GetLocalization(0).InterlocutorSpeech.Title;
-            
             Port inputPort = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Multi, typeof(float));
             inputPort.portColor = Color.white;
             inputPort.portName = "Input";
             inputContainer.Add(inputPort);
             
+            UpdateTitle();
+            UpdatePorts();
+            
             RefreshExpandedState();
-            RefreshPorts();
         }
 
-        private void AddChoice(string choice = "", bool updateChoiceData = true)
+        private void AddPort(string choice, int index)
         {
             Port port = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Single, typeof(float));
             port.portColor = Color.white;
             
-            Label portLabel = port.contentContainer.Q<Label>("type");
-            port.contentContainer.Remove(portLabel);
-            port.contentContainer.Add(new Label("  "));
+            RenamePort(port, choice);
 
             int outputPortCount = outputContainer.Query("connector").ToList().Count();
-            string outputPortName = string.IsNullOrEmpty(choice) ? $"Option {outputPortCount + 1}" : choice;
+            string outputPortName = index.ToString();
             port.portName = outputPortName;
             
             Label label = new Label(outputPortName);
             port.contentContainer.Add(label);
             outputContainer.Add(port);
 
-            if (updateChoiceData)
-            {
-                UpdateChoiceData();
-            }
-
             RefreshPorts();
             RefreshExpandedState();
         }
-
-        private void UpdateChoiceData()
+        
+        private void RenamePort(Port port, string text)
         {
-            /*Choices = string.Empty;
-            List<Port> ports = outputContainer.Query<Port>().ToList();
-            foreach (Port port in ports)
+            List<VisualElement> labels = new List<VisualElement>();
+            for (int i = 0; i < port.contentContainer.childCount; i++)
             {
-                if (port.direction == Direction.Output)
+                if (port.contentContainer[i] is Label)
                 {
-                    Choices += $"{port.portName}";
-                    if (port != ports.Last())
-                    {
-                        Choices += "/";
-                    }
+                    labels.Add(port.contentContainer[i]);
                 }
-            }*/
+            }
+            labels.ForEach((x) => port.contentContainer.Remove(x));
+
+            port.contentContainer.Add(new Label(text));
         }
     }
 }

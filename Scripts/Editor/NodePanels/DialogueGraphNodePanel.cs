@@ -26,7 +26,9 @@ public class DialogueGraphNodePanel : GraphNodePanel
         DrawSettings();
         DrawMainSpeech();
         DrawChoices();
-        //root.Add(DrawMainSpeech());
+        
+        _node.UpdatePorts();
+        _node.UpdatePorts();
     }
 
     private VisualElement DrawToolbar()

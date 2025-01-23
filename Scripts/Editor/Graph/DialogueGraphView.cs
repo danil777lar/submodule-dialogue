@@ -156,7 +156,7 @@ namespace Larje.Dialogue.Editor
         public void Update()
         {
             List<GraphNode> selectedNodes = selection.FindAll(x => x is GraphNode).Cast<GraphNode>().ToList();
-            if (selectedNodes.Count == 1)
+            if (selectedNodes != null && selectedNodes.Count == 1)
             {
                 if (_selectedNode != selectedNodes.First())
                 {

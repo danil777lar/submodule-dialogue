@@ -43,13 +43,14 @@ namespace Larje.Dialogue.Editor.Utility
             {
                 GraphNode outputNode = (edges[i].output.node as GraphNode);
                 GraphNode inputNode = (edges[i].input.node as GraphNode);
-                container.Links.Add(new LinkData
-                {
-                    FromGUID = outputNode.GUID,
-                    FromPortName = edges[i].output.portName,
-                    ToGUID = inputNode.GUID,
-                    ToPortName = edges[i].input.portName
-                });
+
+                LinkData linkData = new LinkData();
+                linkData.FromGUID = outputNode.GUID;
+                linkData.FromPortName = edges[i].output.portName;
+                linkData.ToGUID = inputNode.GUID;
+                linkData.ToPortName = edges[i].input.portName;
+                    
+                container.Links.Add(linkData);
             }
 
             foreach (Node node in view.nodes)
