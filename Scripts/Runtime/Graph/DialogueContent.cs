@@ -6,6 +6,23 @@ using UnityEngine;
 public class DialogueContent
 {
     public List<DialogueLocalization> Localizations;
+
+    public void AddLocalization(string languageCode)
+    {
+        DialogueLocalization localization = new DialogueLocalization
+        {
+            LanguageCode = languageCode,
+            Speech = new Speech(),
+            Choices = new List<Speech>()
+        };
+        
+        Localizations.Add(localization);
+    }
+    
+    public void RemoveLocalization(DialogueLocalization localization)
+    {
+        
+    }
 }
         
 [Serializable]
