@@ -1,15 +1,17 @@
 using System;
 using System.Collections.Generic;
+using Codice.CM.Common;
 using Larje.Dialogue.Editor;
 using UnityEditor;
+using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
+using PopupWindow = UnityEditor.PopupWindow;
 
 public class DialogueGraphNodePanel : GraphNodePanel
 {
     private int _selectedLangIndex;
     private DialogueGraphNode _node;
-    private Dictionary<string, bool> _foldouts = new Dictionary<string, bool>();
     
     public DialogueGraphNodePanel(DialogueGraphNode node)
     {
@@ -19,34 +21,33 @@ public class DialogueGraphNodePanel : GraphNodePanel
     public override void Draw(VisualElement root)
     {
         base.Draw(root);
-    }
-    
-    private void OnGUI()
-    {
-        DrawToolbar();
-        DrawLocalization();
+        root.Add(DrawToolbar());
+        DrawSettings();
+        DrawMainSpeech();
+        //root.Add(DrawMainSpeech());
     }
 
-    private void DrawToolbar()
+    private VisualElement DrawToolbar()
     {
-        EditorGUILayout.BeginHorizontal();
+        ToolbarMenu toolbar = new ToolbarMenu();
+        toolbar.text = $"Language: {_node.Content.Localizations[_selectedLangIndex].LanguageCode.ToUpper()}";
 
         int index = 0; 
         foreach (DialogueLocalization speech in _node.Content.Localizations)
         {
             bool selected = index == _selectedLangIndex;
-            GUILayoutOption[] options = GetLangButtonOptions();
-            GUIStyle style = selected ? GetLangButtonSelectedStyle() : GetLangButtonStyle();
-            if (GUILayout.Button(speech.LanguageCode.ToUpper(), style, options))
+            toolbar.menu.AppendAction(speech.LanguageCode.ToUpper(), (action) =>
             {
                 _selectedLangIndex = _node.Content.Localizations.IndexOf(speech);
-            }
+                Refresh();
+            });
 
             index++;
-            GUILayout.Space(10);
         }
+
+        toolbar.Add(new ToolbarSpacer());
         
-        if (GUILayout.Button("+", GetLangButtonStyle(), GetLangButtonOptions()))
+        toolbar.Add(new Button(() =>
         {
             _node.Content.Localizations.Add(new DialogueLocalization()
             {
@@ -57,54 +58,94 @@ public class DialogueGraphNodePanel : GraphNodePanel
                     Text = "Text" 
                 }
             });
-        }
-        EditorGUILayout.EndHorizontal();
-    }
-
-    private void DrawLocalization()
-    {
-        DialogueLocalization localization = _node.Content.Localizations[_selectedLangIndex];
-        
-        DrawFoldout("MAIN OPTIONS", null, new Action[]
+            _selectedLangIndex = _node.Content.Localizations.Count - 1;
+            Refresh();
+        })
         {
-            () =>
-            {
-                GUILayout.BeginHorizontal();
-                GUILayout.Label("Language Code:", GUILayout.Width(100f));
-                GUILayout.Space(10f);
-                localization.LanguageCode = GUILayout.TextField(localization.LanguageCode, GUILayout.Width(30f));
-                GUILayout.EndHorizontal();
-            },
-
-            () =>
-            {
-                if (GUILayout.Button("Delete", GUILayout.Width(150f)))
-                {
-                    _node.Content.Localizations.Remove(localization);
-                    _selectedLangIndex = Mathf.Max(0, _selectedLangIndex - 1);            
-                }
-            },
-            
-            () =>
-            {
-                if (GUILayout.Button("Add choice", GUILayout.Width(150f)))
-                {
-                    foreach (DialogueLocalization loc in _node.Content.Localizations)
-                    {
-                        loc.Choices.Add(new Speech());
-                    }
-                                
-                }
-            }
+            text = "+"
         });
         
-        DrawSpeech(localization);
-        DrawChoices(localization.Choices);
+        return toolbar;
+    }
+
+    private void DrawSettings()
+    {
+        DialogueLocalization localization = _node.Content.Localizations[_selectedLangIndex];
+        Box settings = GetBox(_root, "MAIN SETTINGS:");
+
+        TextField languageCodeField = new TextField();
+        languageCodeField.label = "Language Code:";
+        languageCodeField.value = localization.LanguageCode;
+        languageCodeField.RegisterCallback<ChangeEvent<string>>((value) =>
+        {
+            localization.LanguageCode = value.newValue;
+        });
+        languageCodeField.RegisterCallback<FocusOutEvent>((value) =>
+        {
+            Refresh();
+        });
+        settings.Add(languageCodeField);
+
+        Button deleteButton = new Button(() =>
+        {
+            _node.Content.Localizations.Remove(localization);
+            _selectedLangIndex = Mathf.Max(0, _selectedLangIndex - 1);
+            Refresh();
+        });
+        deleteButton.text = "Delete";
+        settings.Add(deleteButton);
+        
+        Button addChoiceButton =  new Button(() =>
+        {
+            foreach (DialogueLocalization loc in _node.Content.Localizations)
+            {
+                loc.Choices.Add(new Speech());
+            }
+            Refresh();
+        });
+        addChoiceButton.text = "Add choice";
+        settings.Add(addChoiceButton);
+    }
+    
+    private void DrawMainSpeech()
+    {
+        DialogueLocalization localization = _node.Content.Localizations[_selectedLangIndex];
+        Box box = GetBox(_root, "MAIN SPEECH:");
+        
+        TextField titleField = new TextField();
+        titleField.label = "Title:";
+        titleField.value = localization.Speech.Title;
+        titleField.RegisterCallback<ChangeEvent<string>>((value) =>
+        {
+            localization.Speech.Title = value.newValue;
+        });
+        titleField.RegisterCallback<FocusOutEvent>((value) =>
+        {
+            Refresh();
+        });
+        box.Add(titleField);
+        
+        TextField textField = new TextField();
+        textField.style.whiteSpace = WhiteSpace.Normal;
+        textField.multiline = true;
+        textField.label = "Text:";
+        textField.value = localization.Speech.Text;
+        textField.RegisterCallback<ChangeEvent<string>>((value) =>
+        {
+            localization.Speech.Text = value.newValue;
+        });
+        textField.RegisterCallback<FocusOutEvent>((value) =>
+        {
+            Refresh();
+        });
+        box.Add(textField);
+        
+
     }
 
     private void DrawSpeech(DialogueLocalization localization)
     {
-        DrawFoldout("MAIN SPEECH", null, new Action[]
+        /*DrawFoldout("MAIN SPEECH", null, new Action[]
         {
             () =>
             {
@@ -120,12 +161,12 @@ public class DialogueGraphNodePanel : GraphNodePanel
                 localization.Speech.Text = GUILayout.TextField(localization.Speech.Text);
                 GUILayout.EndHorizontal();
             }
-        });
+        });*/
     }
 
     private void DrawChoices(List<Speech> choices)
     {
-        GUILayout.Space(20f);
+        /*GUILayout.Space(20f);
         if (!_foldouts.ContainsKey("CHOICES"))
         {
             _foldouts.Add("CHOICES", true);
@@ -161,39 +202,7 @@ public class DialogueGraphNodePanel : GraphNodePanel
         
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();   
-        }
-    }
-
-    private void DrawFoldout(string foldoutName, Action titleLine, Action[] lines)
-    {
-        GUILayout.Space(10f);
-        if (!_foldouts.ContainsKey(foldoutName))
-        {
-            _foldouts.Add(foldoutName, true);
-        }
-        
-        GUILayout.BeginHorizontal();
-        _foldouts[foldoutName] = EditorGUILayout.Foldout(_foldouts[foldoutName], foldoutName);
-        titleLine?.Invoke();
-        GUILayout.EndHorizontal();
-
-        if (_foldouts[foldoutName])
-        {
-            GUILayout.BeginHorizontal();
-            GUILayout.Space(20f);
-            GUILayout.BeginVertical();
-            
-            foreach (Action line in lines)
-            {
-                GUILayout.BeginHorizontal();
-                GUILayout.Label("|", GUILayout.Width(10f));
-                line();
-                GUILayout.EndHorizontal();
-            }
-            
-            GUILayout.EndVertical();
-            GUILayout.EndHorizontal();
-        }
+        }*/
     }
     
     private GUILayoutOption[] GetLangButtonOptions()
