@@ -59,7 +59,13 @@ public class DialogueContent
     
     public DialogueLocalization GetLocalization(string languageCode)
     {
-        return Localizations.Find(x => x.LanguageCode == languageCode);
+        DialogueLocalization loc = Localizations.Find(x => x.LanguageCode == languageCode);
+        if (loc == null)
+        {
+            loc = Localizations.Find(x => x.LanguageCode == DEFAULT_LANGUAGE);
+        }
+
+        return loc;
     }
     
     public DialogueLocalization GetLocalization(int index)

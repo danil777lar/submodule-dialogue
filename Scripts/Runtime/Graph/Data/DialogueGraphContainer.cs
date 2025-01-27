@@ -23,7 +23,7 @@ namespace Larje.Dialogue.Runtime.Graph
         public List<LinkData> Links = new List<LinkData>();
         public List<NodeData> Nodes = new List<NodeData>();
         
-        public DialogueStep GetFirstStep(Action<string> sendEvent, Func<string, bool> checkCondition)
+        public DialogueStep GetFirstStep(Action<string> sendEvent, Func<string, bool> checkCondition, string language)
         {
             NodeData enter0 = Nodes.Find(x => 
                 x.IsTypeOf(TYPE_ENTER) && x.GetField<int>("EnterIndex") == 0);
@@ -33,10 +33,10 @@ namespace Larje.Dialogue.Runtime.Graph
             string nextNodeGuid = FindNextStep(link.ToGUID, sendEvent, checkCondition);
             NodeData nextNode = GuidToNode(nextNodeGuid);
             
-            return NodeToStep(nextNode);
+            return NodeToStep(nextNode, language);
         }
         
-        public DialogueStep GetNextStep(string id, string choiceText, Action<string> sendEvent, Func<string, bool> checkCondition)
+        public DialogueStep GetNextStep(string id, string choiceText, Action<string> sendEvent, Func<string, bool> checkCondition, string language)
         {
             NodeData node = Nodes[int.Parse(id)];
             LinkData link = Links.Find(x => 
@@ -45,7 +45,7 @@ namespace Larje.Dialogue.Runtime.Graph
             string nextNodeGuid = FindNextStep(link.ToGUID, sendEvent, checkCondition);
             NodeData nextNode = GuidToNode(nextNodeGuid);
             
-            return NodeToStep(nextNode);
+            return NodeToStep(nextNode, language);
         }
 
         public bool Compare(DialogueGraphContainer other)
@@ -122,22 +122,27 @@ namespace Larje.Dialogue.Runtime.Graph
             return Nodes.Find(x => x.GetField<string>("GUID") == guid);
         }
 
-        private DialogueStep NodeToStep(NodeData node)
+        private DialogueStep NodeToStep(NodeData node, string language)
         {
             if (node != null && node.IsTypeOf(TYPE_DIALOGUE))
             {
                 DialogueStep step = new DialogueStep();
+                DialogueContent content = node.GetField("Content") as DialogueContent;
+
                 step.Id = GuidToId(node.GetField<string>("GUID"));
-                step.Text = node.GetField<string>("DialogueText");
+                step.Title = content.GetLocalization(language).InterlocutorSpeech.Title;
+                step.Text = content.GetLocalization(language).InterlocutorSpeech.Text;
 
                 step.Choices = new List<DialogueStep.Choice>();
                 foreach (LinkData nodeLink in Links)
                 {
                     if (nodeLink.FromGUID == node.GetField<string>("GUID"))
                     {
+                        int index = int.Parse(nodeLink.FromPortName);
                         DialogueStep.Choice choice = new DialogueStep.Choice
                         {
-                            Text = nodeLink.FromPortName
+                            Title = content.GetLocalization(language).PlayerChoices[index].PlayerSpeech.Title,
+                            Text = content.GetLocalization(language).PlayerChoices[index].PlayerSpeech.Text
                         };
                         step.Choices.Add(choice);
                     }

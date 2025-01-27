@@ -56,7 +56,7 @@ namespace Larje.Dialogue.Editor.Utility
                     }
                 }
 
-                view.AddNode(node.Load(nodeData.Position), false);
+                view.AddNode(node.Load(nodeData.Position));
             }
         }
 
@@ -77,7 +77,7 @@ namespace Larje.Dialogue.Editor.Utility
                     edge.output.Connect(edge);
                     edge.input.Connect(edge);
                     
-                    view.AddEdge(edge, false);
+                    view.AddEdge(edge);
                 }
             }
         }

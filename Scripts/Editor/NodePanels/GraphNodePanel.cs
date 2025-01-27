@@ -10,10 +10,15 @@ public class GraphNodePanel
     
     public virtual void Draw(VisualElement root)
     {
-        _root = root;
+        ScrollView scroll = new ScrollView();
+        scroll.mode = ScrollViewMode.Vertical;
+        
+        root.Add(scroll);
+        
+        _root = scroll;
         _root.Clear();
         
-        root.Add(new Label($"{this.GetType()}"));
+        _root.Add(new Label($"{this.GetType()}"));
     }
 
     protected void Refresh()

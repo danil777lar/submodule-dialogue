@@ -50,30 +50,22 @@ namespace Larje.Dialogue.Editor
             grid.StretchToParentSize();
 
             AddSearchWindow(editorWindow);
+
+            this.graphViewChanged += Record;
         }
 
-        public void AddNode(GraphNode node, bool notify = true)
+        public void AddNode(GraphNode node)
         {
             node.EventRemovePort += OnPortRemoved;
             AddElement(node);
             
             node.RefreshPorts();
             node.RefreshExpandedState();
-            
-            if (notify)
-            {
-                Record("Add Node");
-            }
         }
         
-        public void AddEdge(Edge edge, bool notify = true)
+        public void AddEdge(Edge edge)
         {
             Add(edge);
-            
-            if (notify)
-            {
-                Record("Add Edge");
-            }
         }
 
         public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter)
@@ -107,7 +99,7 @@ namespace Larje.Dialogue.Editor
             _currentRecord = _savedRecord;
         }
 
-        public void Record(string actionName)
+        public GraphViewChange Record(GraphViewChange change)
         {
             DialogueGraphContainer newState;
             if (DialogueGraphSaver.TrySaveState(this, _currentRecord, out newState))
@@ -117,11 +109,13 @@ namespace Larje.Dialogue.Editor
                     _undoStack.Remove(_undoStack.Keys.Last());
                 }
                 
-                _undoStack.Add(newState, actionName);
+                _undoStack.Add(newState, "change");
                 _currentRecord = newState;
             }
 
             LogUndoCurrentStack();
+
+            return change;
         }
         
         public void Undo()
@@ -179,6 +173,8 @@ namespace Larje.Dialogue.Editor
                 string marker = _currentRecord == record.Key ? "=>    " : "";
                 debug += $"{marker}{record.Value} \n";
             }
+            
+            //Debug.Log(debug);
         }
 
         private void OnPortRemoved(Port port)

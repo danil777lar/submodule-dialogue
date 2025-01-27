@@ -28,6 +28,11 @@ namespace Larje.Dialogue.Editor
             DrawUI();
             return this;
         }
+        
+        public void UpdateTitle()
+        {
+            title = ConditionName;
+        }
 
         private void DrawUI()
         {
@@ -46,18 +51,7 @@ namespace Larje.Dialogue.Editor
             outputPortFalse.portName = "False";
             outputContainer.Add(outputPortFalse);
             
-            TextField textField = new TextField("");
-            textField.RegisterValueChangedCallback(evt =>
-            {
-                ConditionName = evt.newValue;
-                title = $"{ConditionName}";
-            });
-            
-            title = ConditionName;
-            textField.SetValueWithoutNotify(title);
-            mainContainer.Add(textField);
-            
-            title = $"{ConditionName}";
+            UpdateTitle();
         }
     }
 }

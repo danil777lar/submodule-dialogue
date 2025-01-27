@@ -31,6 +31,11 @@ namespace Larje.Dialogue.Editor
             return this;
         }
 
+        public void UpdateTitle()
+        {
+            title = $"{EventName}";
+        }
+
         private void DrawUI()
         {
             Port inputPort = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Multi, typeof(float));
@@ -43,18 +48,7 @@ namespace Larje.Dialogue.Editor
             outputPort.portName = "Out";
             outputContainer.Add(outputPort);
             
-            TextField textField = new TextField("");
-            textField.RegisterValueChangedCallback(evt =>
-            {
-                EventName = evt.newValue;
-                title = $"{EventName}";
-            });
-
-            title = EventName; 
-            textField.SetValueWithoutNotify(title);
-            mainContainer.Add(textField);
-            
-            title = $"{EventName}";
+            UpdateTitle();
         }
     }
 }

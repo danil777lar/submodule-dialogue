@@ -29,6 +29,11 @@ namespace Larje.Dialogue.Editor
             return this;
         }
 
+        public void UpdateTitle()
+        {
+            title = $"Exit {ExitIndex}";
+        }
+
         private void DrawUI()
         {
             Port inputPort = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Multi, typeof(float));
@@ -36,15 +41,7 @@ namespace Larje.Dialogue.Editor
             inputPort.portName = "In";
             inputContainer.Add(inputPort);
             
-            title = $"Exit {ExitIndex}";
-            IntegerField indexField = new IntegerField(10);
-            indexField.RegisterValueChangedCallback(evt =>
-            {
-                ExitIndex = evt.newValue;
-                title = $"Exit {ExitIndex}";
-            });
-            indexField.SetValueWithoutNotify(ExitIndex);
-            mainContainer.Add(indexField);
+            UpdateTitle();
         }
     }
 }

@@ -22,16 +22,17 @@ public class DialogueGraphNodePanel : GraphNodePanel
     public override void Draw(VisualElement root)
     {
         base.Draw(root);
-        root.Add(DrawToolbar());
+        
+        DrawToolbar();
         DrawSettings();
         DrawMainSpeech();
         DrawChoices();
         
         _node.UpdatePorts();
-        _node.UpdatePorts();
+        _node.UpdateTitle();
     }
 
-    private VisualElement DrawToolbar()
+    private void DrawToolbar()
     {
         ToolbarMenu toolbar = new ToolbarMenu();
         toolbar.text = $"Language: {_node.Content.GetLocalization(_selectedLangIndex).LanguageCode.ToUpper()}";
@@ -62,7 +63,7 @@ public class DialogueGraphNodePanel : GraphNodePanel
             text = "+"
         });
         
-        return toolbar;
+        _root.Add(toolbar);
     }
 
     private void DrawSettings()
