@@ -36,11 +36,11 @@ namespace Larje.Dialogue.Runtime.Graph
             return NodeToStep(nextNode, language);
         }
         
-        public DialogueStep GetNextStep(string id, string choiceText, Action<string> sendEvent, Func<string, bool> checkCondition, string language)
+        public DialogueStep GetNextStep(string id, int choiceId, Action<string> sendEvent, Func<string, bool> checkCondition, string language)
         {
             NodeData node = Nodes[int.Parse(id)];
             LinkData link = Links.Find(x => 
-                x.FromGUID == node.GetField<string>("GUID") && x.FromPortName == choiceText);
+                x.FromGUID == node.GetField<string>("GUID") && x.FromPortName == choiceId.ToString());
             
             string nextNodeGuid = FindNextStep(link.ToGUID, sendEvent, checkCondition);
             NodeData nextNode = GuidToNode(nextNodeGuid);
