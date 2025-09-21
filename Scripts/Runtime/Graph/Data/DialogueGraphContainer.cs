@@ -139,7 +139,8 @@ namespace Larje.Dialogue.Runtime.Graph
                         DialogueStep.Choice choice = new DialogueStep.Choice
                         {
                             Title = content.GetLocalization(language).PlayerChoices[index].PlayerSpeech.Title,
-                            Text = content.GetLocalization(language).PlayerChoices[index].PlayerSpeech.Text
+                            Text = content.GetLocalization(language).PlayerChoices[index].PlayerSpeech.Text,
+                            Condition = content.GetLocalization(language).PlayerChoices[index].PlayerSpeech.Condition
                         };
                         step.Choices.Add(choice);
                     }

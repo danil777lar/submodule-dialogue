@@ -15,6 +15,7 @@ namespace Larje.Dialogue.Runtime.Converted
         {
             public string Title;
             public string Text;
+            public string Condition;
         }
     }
 }

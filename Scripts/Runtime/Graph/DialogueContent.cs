@@ -144,5 +144,6 @@ public class DialogueChoice
 public class Speech
 {
     public string Title;
-    public string Text;    
+    public string Text;
+    public string Condition;
 }

@@ -72,6 +72,7 @@ namespace Larje.Dialogue.Editor
                 {
                     port.name = index.ToString();
                     port.portName = index.ToString();
+                    port.portColor = string.IsNullOrEmpty(choice.PlayerSpeech.Condition) ? Color.aliceBlue : Color.lightSlateBlue;
                     
                     RenamePort(port, choice.PlayerSpeech.Title);
                 }

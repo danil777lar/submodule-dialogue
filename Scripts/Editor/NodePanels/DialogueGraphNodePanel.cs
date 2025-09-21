@@ -197,5 +197,20 @@ public class DialogueGraphNodePanel : GraphNodePanel
             Refresh();
         });
         root.Add(textField);
+        
+        TextField conditionField = new TextField();
+        conditionField.style.whiteSpace = WhiteSpace.Normal;
+        conditionField.multiline = true;
+        conditionField.label = "Condition:";
+        conditionField.value = speech.Condition;
+        conditionField.RegisterCallback<ChangeEvent<string>>((value) =>
+        {
+            speech.Condition = value.newValue;
+        });
+        conditionField.RegisterCallback<FocusOutEvent>((value) =>
+        {
+            Refresh();
+        });
+        root.Add(conditionField);
     }
 }
