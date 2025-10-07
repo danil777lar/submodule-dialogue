@@ -131,13 +131,16 @@ namespace Larje.Dialogue.Runtime.Graph
                 step.Text = content.GetLocalization(language).InterlocutorSpeech.Text;
 
                 step.Choices = new List<DialogueStep.Choice>();
+                Debug.Log($"{content.GetLocalization(language).InterlocutorSpeech.Title}");
                 foreach (LinkData nodeLink in Links)
                 {
                     if (nodeLink.FromGUID == node.GetField<string>("GUID"))
                     {
                         int index = int.Parse(nodeLink.FromPortName);
+                        Debug.Log($"{nodeLink.FromPortName} {content.GetLocalization(language).PlayerChoices[index].PlayerSpeech.Title}");
                         DialogueStep.Choice choice = new DialogueStep.Choice
                         {
+                            Id = index,
                             Title = content.GetLocalization(language).PlayerChoices[index].PlayerSpeech.Title,
                             Text = content.GetLocalization(language).PlayerChoices[index].PlayerSpeech.Text,
                             Condition = content.GetLocalization(language).PlayerChoices[index].PlayerSpeech.Condition
@@ -145,6 +148,7 @@ namespace Larje.Dialogue.Runtime.Graph
                         step.Choices.Add(choice);
                     }
                 }
+                step.Choices = step.Choices.OrderBy(x => x.Id).ToList();
 
                 return step;
             }

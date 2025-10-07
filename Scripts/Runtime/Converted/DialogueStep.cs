@@ -13,6 +13,7 @@ namespace Larje.Dialogue.Runtime.Converted
 
         public class Choice
         {
+            public int Id;
             public string Title;
             public string Text;
             public string Condition;
