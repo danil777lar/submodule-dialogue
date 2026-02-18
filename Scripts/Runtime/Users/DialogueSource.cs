@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Larje.Core;
 using Larje.Dialogue.Runtime.Graph;
 using UnityEngine;
 
@@ -14,6 +15,14 @@ public class DialogueSource : MonoBehaviour
         {
             eventProcessor.SendEvent(eventName);
         }
+    }
+
+    protected virtual void SendTrigger(TriggerConstant trigger)
+    {
+        GameEventService eventService = DIContainer.GetService<GameEventService>();
+        eventService.SendEvent(new GameEventTrigger(trigger, 1f, $"DialogueSource.cs -> {gameObject.name}"));
+
+        Debug.Log("Send trigger: " + trigger);
     }
     
     protected virtual bool CheckCondition(string condition)

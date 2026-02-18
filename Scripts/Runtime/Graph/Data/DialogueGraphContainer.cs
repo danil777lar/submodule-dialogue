@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Larje.Core;
 using Larje.Dialogue.Runtime.Converted;
 using Larje.Dialogue.Runtime.Graph.Data;
 using UnityEngine;
@@ -15,31 +16,32 @@ namespace Larje.Dialogue.Runtime.Graph
         private const string TYPE_ENTER = "EnterGraphNode";
         private const string TYPE_EXIT = "ExitGraphNode";
         private const string TYPE_EVENT = "EventGraphNode";
+        private const string TYPE_TRIGGER = "TriggerGraphNode";
         private const string TYPE_CONDITION = "ConditionGraphNode";
         
         public List<LinkData> Links = new List<LinkData>();
         public List<NodeData> Nodes = new List<NodeData>();
         
-        public DialogueStep GetFirstStep(Action<string> sendEvent, Func<string, bool> checkCondition, string language)
+        public DialogueStep GetFirstStep(Action<string> sendEvent, Action<TriggerConstant> sendTrigger, Func<string, bool> checkCondition, string language)
         {
             NodeData enter0 = Nodes.Find(x => 
                 x.IsTypeOf(TYPE_ENTER) && x.GetField<int>("EnterIndex") == 0);
             
             LinkData link = Links.Find(x => x.FromGUID == enter0.GetField<string>("GUID"));
             
-            string nextNodeGuid = FindNextStep(link.ToGUID, sendEvent, checkCondition);
+            string nextNodeGuid = FindNextStep(link.ToGUID, sendEvent, sendTrigger, checkCondition);
             NodeData nextNode = GuidToNode(nextNodeGuid);
             
             return NodeToStep(nextNode, language);
         }
         
-        public DialogueStep GetNextStep(string id, int choiceId, Action<string> sendEvent, Func<string, bool> checkCondition, string language)
+        public DialogueStep GetNextStep(string id, int choiceId, Action<string> sendEvent, Action<TriggerConstant> sendTrigger, Func<string, bool> checkCondition, string language)
         {
             NodeData node = Nodes[int.Parse(id)];
             LinkData link = Links.Find(x => 
                 x.FromGUID == node.GetField<string>("GUID") && x.FromPortName == choiceId.ToString());
             
-            string nextNodeGuid = FindNextStep(link.ToGUID, sendEvent, checkCondition);
+            string nextNodeGuid = FindNextStep(link.ToGUID, sendEvent, sendTrigger, checkCondition);
             NodeData nextNode = GuidToNode(nextNodeGuid);
             
             return NodeToStep(nextNode, language);
@@ -50,7 +52,7 @@ namespace Larje.Dialogue.Runtime.Graph
             return Nodes.SequenceEqual(other.Nodes) && Links.SequenceEqual(other.Links);
         }
 
-        private string FindNextStep(string guid, Action<string> sendEvent, Func<string, bool> checkCondition)
+        private string FindNextStep(string guid, Action<string> sendEvent, Action<TriggerConstant> sendTrigger, Func<string, bool> checkCondition)
         {
             NodeData node = GuidToNode(guid);
 
@@ -69,6 +71,14 @@ namespace Larje.Dialogue.Runtime.Graph
             if (node.IsTypeOf(TYPE_EVENT))
             {
                 sendEvent?.Invoke(node.GetField<string>("EventName"));
+                
+                LinkData link = Links.Find(x => x.FromGUID == guid);
+                next = link != null ? link.ToGUID : "";
+            }
+
+            if (node.IsTypeOf(TYPE_TRIGGER))
+            {
+                sendTrigger?.Invoke(node.GetField<TriggerConstant>("Trigger"));
                 
                 LinkData link = Links.Find(x => x.FromGUID == guid);
                 next = link != null ? link.ToGUID : "";
@@ -98,7 +108,7 @@ namespace Larje.Dialogue.Runtime.Graph
                 next = link != null ? link.ToGUID : ""; 
             }
             
-            return FindNextStep(next, sendEvent, checkCondition);
+            return FindNextStep(next, sendEvent, sendTrigger, checkCondition);
         }
         
         private string GuidToId(string guid)
