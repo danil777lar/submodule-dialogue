@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Larje.Core;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -7,13 +8,13 @@ using UnityEngine.UIElements;
 namespace Larje.Dialogue.Editor
 {
     [Serializable]
-    public class EventGraphNode : GraphNode
+    public class TriggerGraphNode : GraphNode
     {
-        public string EventName = "";
-        
-        public override string DefaultName => "Event";
-        protected override string StyleSheetName => "EventGraphNode";
-        public override GraphNodePanel GetPanelInstance => new EventGraphNodePanel(this);
+        public TriggerConstant Trigger = null;
+
+        public override string DefaultName => "Trigger";
+        protected override string StyleSheetName => "TriggerGraphNode";
+        public override GraphNodePanel GetPanelInstance => new TriggerGraphNodePanel(this);
         
         public override GraphNode Initialize(Vector2 position, List<Node> allNodes)
         {
@@ -25,14 +26,14 @@ namespace Larje.Dialogue.Editor
         public override GraphNode Load(Vector2 position)
         {
             base.Load(position);
-            
+
             DrawUI();
             return this;
         }
 
         public void UpdateTitle()
         {
-            title = $"{EventName}";
+            title = $"{Trigger?.name ?? "Trigger"}";
         }
 
         private void DrawUI()

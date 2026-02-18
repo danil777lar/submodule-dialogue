@@ -80,9 +80,12 @@ namespace Larje.Dialogue.Editor.Utility
                     Type = field.FieldType.ToString(),
                     Assembly = field.FieldType.Assembly.FullName
                 };
-                
 
-                if (field.CustomAttributes.Any(x => x.AttributeType == typeof(JsonRequiredAttribute)))
+                if (field.FieldType.IsSubclassOf(typeof(UnityEngine.Object)))
+                {
+                    fieldData.UnityObjectValue = field.GetValue(node) as UnityEngine.Object;
+                }
+                else if (field.CustomAttributes.Any(x => x.AttributeType == typeof(JsonRequiredAttribute)))
                 {
                     fieldData.Value = JsonUtility.ToJson(field.GetValue(node));
                     fieldData.IsJson = true;

@@ -68,6 +68,7 @@ namespace Larje.Dialogue.Editor
             if (styleSheet != null)
             {
                 styleSheets.Add(styleSheet);
+                Debug.LogWarning($"Stylesheet {STYLESHEET_PATH + StyleSheetName} loaded!");
             }
             else
             {

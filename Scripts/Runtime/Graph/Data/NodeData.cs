@@ -15,12 +15,12 @@ namespace Larje.Dialogue.Runtime.Graph.Data
         
         public T GetField<T>(string name)
         {
-            Field field = Fields.Find(x => x.Name == name);
-            if (field != null)
-            {
-                return (T) Convert.ChangeType(field.Value, typeof(T));
-            }
+            object value = GetField(name);
             
+            if (value is T)
+            {
+                return (T)value;
+            }
             return default;
         }
         
@@ -31,7 +31,11 @@ namespace Larje.Dialogue.Runtime.Graph.Data
             {
                 Assembly asm = field.Assembly == "" ? Assembly.GetExecutingAssembly() : Assembly.Load(field.Assembly);
                 Type type = asm.GetType(field.Type);
-                if (field.IsJson)
+                if (field.UnityObjectValue != null)
+                {
+                    return field.UnityObjectValue;
+                }
+                else if (field.IsJson)
                 {
                     object data = JsonUtility.FromJson(field.Value, type);
                     return data;
@@ -58,6 +62,7 @@ namespace Larje.Dialogue.Runtime.Graph.Data
             public string Assembly;
             public bool IsJson;
             public string Value;
+            public UnityEngine.Object UnityObjectValue;
         }
     }
 }
